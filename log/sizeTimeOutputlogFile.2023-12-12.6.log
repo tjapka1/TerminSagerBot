@@ -1,0 +1,112 @@
+[2023-12-12 13:39:48] - User: DjTjapka created a new Reminder: Braek 1 3 5 7 13:41
+[2023-12-12 13:39:48] - DjTjapka | Reminder saved: Braek 1 3 5 7 13:41
+[2023-12-12 13:40:59] - Min -10 Braek 13:41
+[2023-12-12 13:41:00] - Min -10 Braek 13:41
+[2023-12-12 13:41:29] - Closing JPA EntityManagerFactory for persistence unit 'default'
+[2023-12-12 13:41:29] - HikariPool-1 - Shutdown initiated...
+[2023-12-12 13:41:29] - HikariPool-1 - Shutdown completed.
+[2023-12-12 13:51:41] - Starting TerminSagerBotApplication using Java 19.0.1 with PID 27576 (F:\Java\TerminSagerBot\target\classes started by tjapka in F:\Java\TerminSagerBot)
+[2023-12-12 13:51:41] - No active profile set, falling back to 1 default profile: "default"
+[2023-12-12 13:51:42] - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+[2023-12-12 13:51:42] - Finished Spring Data repository scanning in 45 ms. Found 4 JPA repository interfaces.
+[2023-12-12 13:51:42] - HHH000204: Processing PersistenceUnitInfo [name: default]
+[2023-12-12 13:51:42] - HHH000412: Hibernate ORM core version 6.2.13.Final
+[2023-12-12 13:51:42] - HHH000406: Using bytecode reflection optimizer
+[2023-12-12 13:51:42] - No LoadTimeWeaver setup: ignoring JPA class transformer
+[2023-12-12 13:51:42] - HikariPool-1 - Starting...
+[2023-12-12 13:51:42] - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@3457cc8d
+[2023-12-12 13:51:42] - HikariPool-1 - Start completed.
+[2023-12-12 13:51:42] - HHH90000025: MySQL8Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+[2023-12-12 13:51:42] - HHH90000026: MySQL8Dialect has been deprecated; use org.hibernate.dialect.MySQLDialect instead
+[2023-12-12 13:51:43] - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+[2023-12-12 13:51:43] - Initialized JPA EntityManagerFactory for persistence unit 'default'
+[2023-12-12 13:51:44] - Started TerminSagerBotApplication in 3.298 seconds (process running for 4.029)
+[2023-12-12 13:52:41] - User show your List of all Reminders: 3
+[2023-12-12 13:53:24] - User: DjTjapka created a new Reminder: Braek 1 3 5 7 13:55
+[2023-12-12 13:53:24] - DjTjapka | Reminder saved: Braek 1 3 5 7 13:55
+[2023-12-12 13:54:59] - Min -10 Braek 13:55
+[2023-12-12 13:55:00] - Min -10 Braek 13:55
+[2023-12-12 13:55:15] - Closing JPA EntityManagerFactory for persistence unit 'default'
+[2023-12-12 13:55:15] - HikariPool-1 - Shutdown initiated...
+[2023-12-12 13:55:15] - HikariPool-1 - Shutdown completed.
+[2023-12-12 13:55:19] - Starting TerminSagerBotApplication using Java 19.0.1 with PID 11600 (F:\Java\TerminSagerBot\target\classes started by tjapka in F:\Java\TerminSagerBot)
+[2023-12-12 13:55:19] - No active profile set, falling back to 1 default profile: "default"
+[2023-12-12 13:55:19] - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+[2023-12-12 13:55:19] - Finished Spring Data repository scanning in 45 ms. Found 4 JPA repository interfaces.
+[2023-12-12 13:55:20] - HHH000204: Processing PersistenceUnitInfo [name: default]
+[2023-12-12 13:55:20] - HHH000412: Hibernate ORM core version 6.2.13.Final
+[2023-12-12 13:55:20] - HHH000406: Using bytecode reflection optimizer
+[2023-12-12 13:55:20] - No LoadTimeWeaver setup: ignoring JPA class transformer
+[2023-12-12 13:55:20] - HikariPool-1 - Starting...
+[2023-12-12 13:55:20] - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@3457cc8d
+[2023-12-12 13:55:20] - HikariPool-1 - Start completed.
+[2023-12-12 13:55:20] - HHH90000025: MySQL8Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+[2023-12-12 13:55:20] - HHH90000026: MySQL8Dialect has been deprecated; use org.hibernate.dialect.MySQLDialect instead
+[2023-12-12 13:55:21] - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+[2023-12-12 13:55:21] - Initialized JPA EntityManagerFactory for persistence unit 'default'
+[2023-12-12 13:55:22] - Started TerminSagerBotApplication in 3.275 seconds (process running for 3.996)
+[2023-12-12 14:11:05] - Closing JPA EntityManagerFactory for persistence unit 'default'
+[2023-12-12 14:11:05] - HikariPool-1 - Shutdown initiated...
+[2023-12-12 14:11:05] - HikariPool-1 - Shutdown completed.
+[2023-12-12 14:11:11] - Starting TerminSagerBotApplication using Java 19.0.1 with PID 27436 (F:\Java\TerminSagerBot\target\classes started by tjapka in F:\Java\TerminSagerBot)
+[2023-12-12 14:11:11] - No active profile set, falling back to 1 default profile: "default"
+[2023-12-12 14:11:11] - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+[2023-12-12 14:11:11] - Finished Spring Data repository scanning in 49 ms. Found 4 JPA repository interfaces.
+[2023-12-12 14:11:11] - HHH000204: Processing PersistenceUnitInfo [name: default]
+[2023-12-12 14:11:12] - HHH000412: Hibernate ORM core version 6.2.13.Final
+[2023-12-12 14:11:12] - HHH000406: Using bytecode reflection optimizer
+[2023-12-12 14:11:12] - No LoadTimeWeaver setup: ignoring JPA class transformer
+[2023-12-12 14:11:12] - HikariPool-1 - Starting...
+[2023-12-12 14:11:12] - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@3457cc8d
+[2023-12-12 14:11:12] - HikariPool-1 - Start completed.
+[2023-12-12 14:11:12] - HHH90000025: MySQL8Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+[2023-12-12 14:11:12] - HHH90000026: MySQL8Dialect has been deprecated; use org.hibernate.dialect.MySQLDialect instead
+[2023-12-12 14:11:13] - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+[2023-12-12 14:11:13] - Initialized JPA EntityManagerFactory for persistence unit 'default'
+[2023-12-12 14:11:14] - Started TerminSagerBotApplication in 3.155 seconds (process running for 3.865)
+[2023-12-12 14:11:56] - Closing JPA EntityManagerFactory for persistence unit 'default'
+[2023-12-12 14:11:56] - HikariPool-1 - Shutdown initiated...
+[2023-12-12 14:11:56] - HikariPool-1 - Shutdown completed.
+[2023-12-12 14:16:22] - Starting TerminSagerBotApplication using Java 19.0.1 with PID 26660 (F:\Java\TerminSagerBot\target\classes started by tjapka in F:\Java\TerminSagerBot)
+[2023-12-12 14:16:22] - No active profile set, falling back to 1 default profile: "default"
+[2023-12-12 14:16:22] - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+[2023-12-12 14:16:22] - Finished Spring Data repository scanning in 49 ms. Found 4 JPA repository interfaces.
+[2023-12-12 14:16:22] - HHH000204: Processing PersistenceUnitInfo [name: default]
+[2023-12-12 14:16:22] - HHH000412: Hibernate ORM core version 6.2.13.Final
+[2023-12-12 14:16:22] - HHH000406: Using bytecode reflection optimizer
+[2023-12-12 14:16:23] - No LoadTimeWeaver setup: ignoring JPA class transformer
+[2023-12-12 14:16:23] - HikariPool-1 - Starting...
+[2023-12-12 14:16:23] - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@3457cc8d
+[2023-12-12 14:16:23] - HikariPool-1 - Start completed.
+[2023-12-12 14:16:23] - HHH90000025: MySQL8Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+[2023-12-12 14:16:23] - HHH90000026: MySQL8Dialect has been deprecated; use org.hibernate.dialect.MySQLDialect instead
+[2023-12-12 14:16:24] - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+[2023-12-12 14:16:24] - Initialized JPA EntityManagerFactory for persistence unit 'default'
+[2023-12-12 14:16:25] - Started TerminSagerBotApplication in 3.384 seconds (process running for 4.11)
+[2023-12-12 14:16:25] - Closing JPA EntityManagerFactory for persistence unit 'default'
+[2023-12-12 14:16:25] - HikariPool-1 - Shutdown initiated...
+[2023-12-12 14:16:25] - 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+[2023-12-12 14:16:25] - HikariPool-1 - Shutdown completed.
+[2023-12-12 14:17:34] - Starting TerminSagerBotApplication using Java 19.0.1 with PID 27316 (F:\Java\TerminSagerBot\target\classes started by tjapka in F:\Java\TerminSagerBot)
+[2023-12-12 14:17:34] - No active profile set, falling back to 1 default profile: "default"
+[2023-12-12 14:17:34] - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+[2023-12-12 14:17:35] - Finished Spring Data repository scanning in 51 ms. Found 4 JPA repository interfaces.
+[2023-12-12 14:17:35] - HHH000204: Processing PersistenceUnitInfo [name: default]
+[2023-12-12 14:17:35] - HHH000412: Hibernate ORM core version 6.2.13.Final
+[2023-12-12 14:17:35] - HHH000406: Using bytecode reflection optimizer
+[2023-12-12 14:17:35] - No LoadTimeWeaver setup: ignoring JPA class transformer
+[2023-12-12 14:17:35] - HikariPool-1 - Starting...
+[2023-12-12 14:17:35] - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@3457cc8d
+[2023-12-12 14:17:35] - HikariPool-1 - Start completed.
+[2023-12-12 14:17:35] - HHH90000025: MySQL8Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+[2023-12-12 14:17:35] - HHH90000026: MySQL8Dialect has been deprecated; use org.hibernate.dialect.MySQLDialect instead
+[2023-12-12 14:17:36] - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+[2023-12-12 14:17:36] - Initialized JPA EntityManagerFactory for persistence unit 'default'
+[2023-12-12 14:17:37] - Started TerminSagerBotApplication in 3.083 seconds (process running for 3.812)
+[2023-12-12 14:18:19] - User: DjTjapka created a new Reminder: Braek 1 2 3 4 5 6 7 12:00
+[2023-12-12 14:18:19] - DjTjapka | Reminder saved: Braek 1 2 3 4 5 6 7 12:00
+[2023-12-12 14:19:00] - User: DjTjapka created a new Reminder: Braek 1 12:00
+[2023-12-12 14:19:01] - DjTjapka | Reminder saved: Braek 1 12:00
+[2023-12-12 14:19:13] - User show your List of all Reminders: 6
