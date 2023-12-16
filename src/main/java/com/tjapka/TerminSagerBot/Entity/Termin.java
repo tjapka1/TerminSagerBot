@@ -25,7 +25,7 @@ public class Termin {
     private String terminTime;
     @Column(name = "created_at")
     private Timestamp createdAt;
-    @ManyToOne()
+    @ManyToOne( )
     @JoinColumn(name = "user_id" )
     private User user;
 

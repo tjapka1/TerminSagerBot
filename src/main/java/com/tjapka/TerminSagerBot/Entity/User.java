@@ -23,12 +23,16 @@ public class User {
     private String lastName;
     @Column(name = "userName")
     private String userName;
+    @Column(name = "region")
+    private String region;
     @Column(name = "registeredAt")
     private Timestamp registeredAt;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Termin> termins;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Birthday> birthdays;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Reminder> reminders;
 
 
 

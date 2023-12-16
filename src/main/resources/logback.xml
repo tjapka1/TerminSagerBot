@@ -5,12 +5,12 @@
         </encoder>
     </appender>
     <appender name="SIZE_TIME_OUTPUT_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>./log/sizeTimeOutputlogFile.log</file>
+        <file>var/log/terminSager.log</file>
         <encoder>
             <pattern>[%d{yyyy-MM-dd HH:mm:ss}] - %msg%n</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>./log/sizeTimeOutputlogFile.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>var/log/terminSager.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <!--Max Size of file to start Archive -->
                 <maxFileSize>10KB</maxFileSize>
