@@ -54,38 +54,36 @@ public class Bot extends TelegramLongPollingBot {
     BirthdayRepository birthdayRepository;
     @Autowired
     ReminderRepository reminderRepository;
-
-
+    static List<String>selectedCommands = new ArrayList<>();
 
     public Bot(BotConfig config) {
 
         this.config = config;
 
         //Меню Комманд
-        List<BotCommand> listOfCommands = new ArrayList<>();
-        listOfCommands.add(new BotCommand("/start", "get a welcome message"));
-        listOfCommands.add(new BotCommand("/mydata", "get my Data storage"));
-        listOfCommands.add(new BotCommand("/setregion", "set your region"));
-        listOfCommands.add(new BotCommand("/deleteuserdata", "delete my Data"));
-        listOfCommands.add(new BotCommand("/newtermin", "set new Termin"));
-        listOfCommands.add(new BotCommand("/showtermin", "View alls Termins"));
-        listOfCommands.add(new BotCommand("/deletetermin", "delete one Termin"));
-        listOfCommands.add(new BotCommand("/newbirthday", "set new Birthday"));
-        listOfCommands.add(new BotCommand("/showbirthday", "View alls Birthday"));
-        listOfCommands.add(new BotCommand("/deletebirthday", "delete one birthday"));
-        listOfCommands.add(new BotCommand("/newreminder", "set new reminder"));
-        listOfCommands.add(new BotCommand("/showreminder", "View alls reminder"));
-        listOfCommands.add(new BotCommand("/deletereminder", "delete one reminder"));
-        listOfCommands.add(new BotCommand("/help", "Info how to use this Bot"));
-        try {
-            this.execute(new SetMyCommands(listOfCommands, new BotCommandScopeDefault(), null));
-        }catch (TelegramApiException e){
-            log.error("Error setting bots command list: " + e.getMessage());
-        }
 
-
-
-    }
+            List<BotCommand> listOfCommands = new ArrayList<>();
+            listOfCommands.add(new BotCommand("/start", "get a welcome message"));
+            listOfCommands.add(new BotCommand("/mydata", "get my Data storage"));
+            listOfCommands.add(new BotCommand("/setregion", "set your region"));
+            listOfCommands.add(new BotCommand("/setusername", "set your username"));
+            listOfCommands.add(new BotCommand("/deleteuserdata", "delete my Data"));
+            listOfCommands.add(new BotCommand("/newtermin", "set new Termin"));
+            listOfCommands.add(new BotCommand("/showtermin", "View alls Termins"));
+            listOfCommands.add(new BotCommand("/deletetermin", "delete one Termin"));
+            listOfCommands.add(new BotCommand("/newbirthday", "set new Birthday"));
+            listOfCommands.add(new BotCommand("/showbirthday", "View alls Birthday"));
+            listOfCommands.add(new BotCommand("/deletebirthday", "delete one birthday"));
+            listOfCommands.add(new BotCommand("/newreminder", "set new reminder"));
+            listOfCommands.add(new BotCommand("/showreminder", "View alls reminder"));
+            listOfCommands.add(new BotCommand("/deletereminder", "delete one reminder"));
+            listOfCommands.add(new BotCommand("/help", "Info how to use this Bot"));
+            try {
+                this.execute(new SetMyCommands(listOfCommands, new BotCommandScopeDefault(), null));
+            } catch (TelegramApiException e) {
+                log.error("Error setting bots command list: " + e.getMessage());
+            }
+           }
     @Override
     public String getBotUsername() {
         return config.getBotName();
@@ -94,13 +92,13 @@ public class Bot extends TelegramLongPollingBot {
     public String getBotToken() {
         return config.getBotToken();
     }
-    static List<String>selectedCommands = new ArrayList<>();
 
     @Override
     public void onUpdateReceived(Update update) {
            if (update.hasMessage() && update.getMessage().hasText()){
             handleMessage(update.getMessage());
         }
+
     }
     private void handleMessage(Message message) {
 
@@ -119,7 +117,7 @@ public class Bot extends TelegramLongPollingBot {
 
         //------------------------------------------------
         List<String>fnkStart=List.of("/start", "/help");
-        List<String>fnkUserQ=List.of("/setregion", "/deleteuserdata");
+        List<String>fnkUserQ=List.of("/setregion", "/deleteuserdata", "/username", "/firstname", "/lastname");
         List<String>fnkUser= new ArrayList<>(List.of("/registrade", "/mydata"));
         fnkUser.addAll(fnkUserQ);
         List<String>fnkTermin=List.of("/newtermin", "/showtermin", "/deletetermin");
@@ -129,6 +127,7 @@ public class Bot extends TelegramLongPollingBot {
         List<String>fnkAll= new ArrayList<>();
         fnkAll.addAll(fnkStart);
         fnkAll.addAll(fnkTermin);
+
         fnkAll.addAll(fnkUser);
         fnkAll.addAll(fnkBirthDay);
         fnkAll.addAll(fnkReminder);
@@ -174,6 +173,16 @@ public class Bot extends TelegramLongPollingBot {
         if (messageText.equals("/deleteuserdata")){
             selectedCommands.add("/deleteuserdata");
         }
+        if (messageText.equals("/username")){
+            selectedCommands.add("/username");
+        }
+        if (messageText.equals("/firstname")){
+            selectedCommands.add("/firstname");
+        }
+        if (messageText.equals("/lastname")){
+            selectedCommands.add("/lastname");
+        }
+
         //------------------------------------------------
         if (fnkStart.contains(fnkBTN)) {
             startFunk(message, fnkBTN, chatId, userName);
@@ -186,7 +195,7 @@ public class Bot extends TelegramLongPollingBot {
             }
 
         }else if (fnkBirthDay.contains(fnkBTN)){
-            birthDayFunk(message, fnkBTN, chatId, userName);
+            birthDayFunk(fnkBTN, chatId, userName);
 
         }else if (fnkReminder.contains(fnkBTN)){
             reminderFunk(message, fnkBTN, chatId, userName);
@@ -205,11 +214,11 @@ public class Bot extends TelegramLongPollingBot {
         }else if (!messageText.contains("/") && selectedCommands.get(0).equals("/newtermin")){
             buildNewTermin(message, chatId);
         }else if (!messageText.contains("/") && selectedCommands.get(0).equals("/deletetermin")){
-            deleteOneTermin(message, chatId);
+            deleteTermin(message, chatId);
         }else if (!messageText.contains("/") && selectedCommands.get(0).equals("/newbirthday")){
             buildNewBirthday(message, chatId);
         }else if (!messageText.contains("/") && selectedCommands.get(0).equals("/deletebirthday")){
-            deleteOneBirthday(message, chatId);
+            deleteBirthday(message, chatId);
         }else if (!messageText.contains("/") && selectedCommands.get(0).equals("/newreminder")){
             buildNewReminder(message, chatId);
         }else if (!messageText.contains("/") && selectedCommands.get(0).equals("/deletereminder")){
@@ -218,9 +227,17 @@ public class Bot extends TelegramLongPollingBot {
             setUserRegion(message, chatId);
         }else if (!messageText.contains("/") && selectedCommands.get(0).equals("/deleteuserdata")){
             deleteUserData(chatId, messageText);
+        }else if (!messageText.contains("/") && selectedCommands.get(0).equals("/username")){
+            setUsername(chatId, message);
+        }else if (!messageText.contains("/") && selectedCommands.get(0).equals("/firstname")){
+            setfirstname(chatId, message);
+        }else if (!messageText.contains("/") && selectedCommands.get(0).equals("/lastname")){
+            setLastname(chatId, message);
         }
         //------------------------------------------------
     }
+
+
 
     //Menus
 
@@ -228,7 +245,7 @@ public class Bot extends TelegramLongPollingBot {
         switch (messageText) {
             case "/start":
                 registerUser(message);
-                start(chatId, userName);
+                start(chatId);
                 break;
             case "/help":
                 help(chatId);
@@ -243,6 +260,15 @@ public class Bot extends TelegramLongPollingBot {
         switch (messageText) {
             case "/registrade":
                 registerUser(message);
+                break;
+            case "/username":
+                buildMessage(chatId, "Please enter your username.");
+                break;
+            case "/firstname":
+                buildMessage(chatId, "Please enter your firstname.");
+                break;
+            case "/lastname":
+                buildMessage(chatId, "Please enter your lastname.");
                 break;
             case "/mydata":
                 myDataUser(chatId);
@@ -276,15 +302,20 @@ public class Bot extends TelegramLongPollingBot {
                 showAllTermins(chatId);
                 break;
             case "/deletetermin":
-                showAllTermins(chatId);
-                buildMessage(chatId, "Please enter your terminID Of delete");
+                if (!terminRepository.findByUserId(chatId).isEmpty()){
+                    showAllTermins(chatId);
+                    buildMessage(chatId, "Please enter your terminID Of delete");
+                }else {
+                    buildMessage(chatId, "You have not Termins" );
+                    selectedCommands.clear();
+                }
                 break;
             default:
                 defaultCo(chatId, userName, fnkBTN);
                 break;
         }
     }
-    private void birthDayFunk(Message message, String messageText, long chatId, String userName) {
+    private void birthDayFunk(String messageText, long chatId, String userName) {
         switch (messageText) {
             case "/newbirthday":
                 buildMessage(chatId, "Please enter new Birthday! \nExample:  \nPerson Firstname, Person Lastname, Birthday Date\nExample Firstname, Example Lastname, 00.00.0000");
@@ -293,8 +324,13 @@ public class Bot extends TelegramLongPollingBot {
                 showAllBirthday(chatId);
                 break;
             case "/deletebirthday":
-                showAllBirthday(chatId);
-                buildMessage(chatId, "Please enter your BirthDayID Of delete");
+                if (!birthdayRepository.findByUserId(chatId).isEmpty()) {
+                    showAllBirthday(chatId);
+                    buildMessage(chatId, "Please enter your BirthDayID Of delete");
+                }else {
+                    buildMessage(chatId, "You have not Birthdays" );
+                    selectedCommands.clear();
+                }
                 break;
             default:
                 defaultCo(chatId, userName, messageText);
@@ -326,8 +362,13 @@ public class Bot extends TelegramLongPollingBot {
                 showAllReminder(chatId);
                 break;
             case "/deletereminder":
-                showAllReminder(chatId);
-                buildMessage(chatId, "Please enter your ReminderID Of delete");
+                if (!reminderRepository.findByUserId(chatId).isEmpty()) {
+                    showAllReminder(chatId);
+                    buildMessage(chatId, "Please enter your ReminderID Of delete");
+                }else {
+                    buildMessage(chatId, "You have not Birthdays" );
+                    selectedCommands.clear();
+                }
                 break;
             default:
                 defaultCo(chatId, userName, messageText);
@@ -335,67 +376,58 @@ public class Bot extends TelegramLongPollingBot {
 
         }
     }
-    private void addReminder(long chatId, String reminderTittle, String reminderDays, String reminderTime) {
-        //Reminder
-        if (userRepository.findById(chatId).isPresent()) {
-            Optional<User> user;
-            user = Optional.of(userRepository.findById(chatId).get());
-            Reminder reminder = Reminder.builder()
-                    .reminderTittle(reminderTittle)
-                    .reminderDays(reminderDays)
-                    .reminderTime(reminderTime)
-                    .user(user.get())
-                    .createdAt(new Timestamp(System.currentTimeMillis()))
-                    .build();
 
-            reminderRepository.save(reminder);
+    private void buildNewTermin(Message message, long chatId){
 
-            String answer = user.get().getUserName() + " | Reminder saved: " + reminderTittle + " " + reminderDays + " " + reminderTime;
-            log.info(answer);
-            buildMessage(chatId, answer);
-        }
-    }
-    private void showAllReminder(long chatId) {
-        List<Reminder> userReminder = reminderRepository.findByUserId(chatId);
-        String answer="";
-        if (!userReminder.isEmpty()) {
-            for (Reminder reminder : userReminder) {
-
-                String createdDate = reminder.getCreatedAt().toString();
-
-                List<String>parser = List.of(createdDate.split(" "));
-
-                String date =parser.get(0);
-                List<String>dateList=List.of(date.split("-"));
-
-
-                answer = reminder.getId() + ": " + reminder.getReminderTittle() + " " + reminder.getReminderDays() + " | " +
-                        reminder.getReminderTime() + " | created: " + dateList.get(2)+"."+ dateList.get(1)+"."+ dateList.get(0) ;
-
-                buildMessage(chatId, answer);
-            }
-            log.info("User show your List of all Reminders: "+userReminder.size());
-        }else {
-            answer ="you have not Reminders";
-            log.info(answer);
-            buildMessage(chatId, answer);
-        }
-    }
-    private void deleteOneReminder(Message message, long chatId) {
         String parseString = message.getText();
 
-        Long reminderId = Long.valueOf(parseString);
+        List<String>parser = List.of(parseString.split(", "));
 
-        Optional<Reminder> reminder = reminderRepository.findById(reminderId);
+        String terminName = parser.get(0).trim();
+        String terminDate = parser.get(1).trim();
+        String terminTime = parser.get(2).trim();
 
-        String answer="deleted Reminder: " + reminder.get().getId() + " " + reminder.get().getReminderTittle() + " " + reminder.get().getReminderTime();
+        String [] terminDateparser = terminDate.split("\\.");
+        //dateForm
 
-        reminderRepository.deleteById(reminderId);
-        buildMessage(chatId, answer);
+        Timestamp timeStamp = new Timestamp(System.currentTimeMillis());
+        String datapar = timeStamp.toString();
+
+        String setDate = dateParser(datapar, terminDateparser);
+
+        String answer = "User: " + message.getFrom().getUserName() + " " +
+                "created a new event: " + terminName + " " + setDate + " " + terminTime;
+
         log.info(answer);
+        buildMessage(chatId, answer);
+        addTermin(chatId, terminName, setDate, terminTime);
         selectedCommands.clear();
     }
-    //Birthday
+    private void buildNewBirthday(Message message, long chatId) {
+        String parseString = message.getText();
+
+        List<String>parser = List.of(parseString.split(", "));
+
+        String firstName = parser.get(0).trim();
+        String lastName = parser.get(1).trim();
+        String birthdayDate = parser.get(2).trim();
+
+        String [] terminDateparser = birthdayDate.split("\\.");
+        //dateForm
+
+        Timestamp timeStamp = new Timestamp(System.currentTimeMillis());
+        String datapar = timeStamp.toString();
+
+        String setDate = dateParser(datapar, terminDateparser);
+
+        String answer = "User: " + message.getFrom().getUserName() + " " +
+                "created a new Birthday: " + firstName + " " + lastName + " " + setDate;
+
+        log.info(answer);
+        buildMessage(chatId, answer);
+        addBirthday(chatId, firstName, lastName, setDate);
+        selectedCommands.clear();
+    }
     private void buildNewReminder(Message message, long chatId) {
         String parseString = message.getText();
 
@@ -428,30 +460,24 @@ public class Bot extends TelegramLongPollingBot {
         addReminder(chatId, reminderTittle, reminderDays, reminderTime);
         selectedCommands.clear();
     }
-    private void buildNewBirthday(Message message, long chatId) {
-        String parseString = message.getText();
 
-        List<String>parser = List.of(parseString.split(", "));
+    private void addTermin(long chatId, String terminName, String terminDate, String terminTime ) {
+        if (userRepository.findById(chatId).isPresent()) {
+            Optional<User> user;
+            user = Optional.of(userRepository.findById(chatId).get());
+            Termin termin = Termin.builder()
+                    .user(user.get())
+                    .terminName(terminName)
+                    .terminDate(terminDate)
+                    .terminTime(terminTime)
+                    .createdAt(new Timestamp(System.currentTimeMillis()))
+                    .build();
+            terminRepository.save(termin);
 
-        String firstName = parser.get(0).trim();
-        String lastName = parser.get(1).trim();
-        String birthdayDate = parser.get(2).trim();
-
-        String [] terminDateparser = birthdayDate.split("\\.");
-        //dateForm
-
-        Timestamp timeStamp = new Timestamp(System.currentTimeMillis());
-        String datapar = timeStamp.toString();
-
-        String setDate = dateParser(datapar, terminDateparser);
-
-        String answer = "User: " + message.getFrom().getUserName() + " " +
-                "created a new Birthday: " + firstName + " " + lastName + " " + setDate;
-
-        log.info(answer);
-        buildMessage(chatId, answer);
-        addBirthday(chatId, firstName, lastName, setDate);
-        selectedCommands.clear();
+            String answer = user.get().getUserName() + " Termin saved: " + terminName;
+            log.info(answer);
+            buildMessage(chatId, answer);
+        }
     }
     private void addBirthday(long chatId, String firstName, String lastName, String setDate) {
         if (userRepository.findById(chatId).isPresent()) {
@@ -467,6 +493,56 @@ public class Bot extends TelegramLongPollingBot {
             birthdayRepository.save(birthday);
 
             String answer = user.get().getUserName() + " | Birthday saved: " + firstName + " " + lastName + " " + setDate;
+            log.info(answer);
+            buildMessage(chatId, answer);
+        }
+    }
+    private void addReminder(long chatId, String reminderTittle, String reminderDays, String reminderTime) {
+        //Reminder
+        if (userRepository.findById(chatId).isPresent()) {
+            Optional<User> user;
+            user = Optional.of(userRepository.findById(chatId).get());
+            Reminder reminder = Reminder.builder()
+                    .reminderTittle(reminderTittle)
+                    .reminderDays(reminderDays)
+                    .reminderTime(reminderTime)
+                    .user(user.get())
+                    .createdAt(new Timestamp(System.currentTimeMillis()))
+                    .build();
+
+            reminderRepository.save(reminder);
+
+            String answer = user.get().getUserName() + " | Reminder saved: " + reminderTittle + " " + reminderDays + " " + reminderTime;
+            log.info(answer);
+            buildMessage(chatId, answer);
+        }
+    }
+
+    private void showAllTermins(long chatId) {
+        List<Termin> userTermins = terminRepository.findByUserId(chatId);
+        String answer="";
+        if (!userTermins.isEmpty()) {
+            for (Termin termin : userTermins) {
+
+                String createdDate = termin.getCreatedAt().toString();
+                List<String>parser = List.of(createdDate.split(" "));
+
+                String date =parser.get(0);
+                List<String>dateList=List.of(date.split("-"));
+
+                String time = parser.get(1);
+                List<String>timeList=List.of(time.split(":"));
+
+                answer = termin.getId() + ": " + termin.getTerminName() + " | " +
+                        termin.getTerminDate() + " | " + termin.getTerminTime() + " | created: " + dateList.get(2)+"."+ dateList.get(1)+"."+ dateList.get(0) + " | " +
+                        timeList.get(0)+":"+timeList.get(1);
+
+
+                buildMessage(chatId, answer);
+            }
+            log.info("User show your List of all Termins: "+userTermins.size());
+        }else {
+            answer ="you have not Termins";
             log.info(answer);
             buildMessage(chatId, answer);
         }
@@ -497,110 +573,91 @@ public class Bot extends TelegramLongPollingBot {
             buildMessage(chatId, answer);
         }
     }
-    private void deleteOneBirthday(Message message, long chatId) {
-        String parseString = message.getText();
-
-        Long birthdayId = Long.valueOf(parseString);
-
-        Optional<Birthday> birthday = birthdayRepository.findById(birthdayId);
-
-        String answer="deleted Birthday: " + birthday.get().getId() + " " + birthday.get().getBirthdayFirstName() + " " + birthday.get().getBirthdayLarstName();
-
-        birthdayRepository.deleteById(birthdayId);
-        buildMessage(chatId, answer);
-        log.info(answer);
-        selectedCommands.clear();
-    }
-    //TerminFunk
-    private void buildNewTermin(Message message, long chatId){
-
-        String parseString = message.getText();
-
-        List<String>parser = List.of(parseString.split(", "));
-
-        String terminName = parser.get(0).trim();
-        String terminDate = parser.get(1).trim();
-        String terminTime = parser.get(2).trim();
-
-        String [] terminDateparser = terminDate.split("\\.");
-        //dateForm
-
-        Timestamp timeStamp = new Timestamp(System.currentTimeMillis());
-        String datapar = timeStamp.toString();
-
-        String setDate = dateParser(datapar, terminDateparser);
-
-        String answer = "User: " + message.getFrom().getUserName() + " " +
-                "created a new event: " + terminName + " " + setDate + " " + terminTime;
-
-        log.info(answer);
-        buildMessage(chatId, answer);
-        addTermin(chatId, terminName, setDate, terminTime);
-        selectedCommands.clear();
-    }
-    private void showAllTermins(long chatId) {
-        List<Termin> userTermins = terminRepository.findByUserId(chatId);
+    private void showAllReminder(long chatId) {
+        List<Reminder> userReminder = reminderRepository.findByUserId(chatId);
         String answer="";
-        if (!userTermins.isEmpty()) {
-            for (Termin termin : userTermins) {
+        if (!userReminder.isEmpty()) {
+            for (Reminder reminder : userReminder) {
 
-                String createdDate = termin.getCreatedAt().toString();
+                String createdDate = reminder.getCreatedAt().toString();
+
                 List<String>parser = List.of(createdDate.split(" "));
 
                 String date =parser.get(0);
                 List<String>dateList=List.of(date.split("-"));
 
-                String time = parser.get(1);
-                List<String>timeList=List.of(time.split(":"));
 
-                answer = termin.getId() + ": " + termin.getTerminName() + " | " +
-                        termin.getTerminDate() + " | " + termin.getTerminTime() + " | created: " + dateList.get(2)+"."+ dateList.get(1)+"."+ dateList.get(0) + " | " +
-                        timeList.get(0)+":"+timeList.get(1);
-
+                answer = reminder.getId() + ": " + reminder.getReminderTittle() + " " + reminder.getReminderDays() + " | " +
+                        reminder.getReminderTime() + " | created: " + dateList.get(2)+"."+ dateList.get(1)+"."+ dateList.get(0) ;
 
                 buildMessage(chatId, answer);
             }
-            log.info("User show your List of all Termins: "+userTermins.size());
+            log.info("User show your List of all Reminders: "+userReminder.size());
         }else {
-            answer ="you have not Termins";
+            answer ="you have not Reminders";
             log.info(answer);
             buildMessage(chatId, answer);
         }
-        }
-    private void deleteOneTermin(Message message, Long chatId) {
+    }
+
+    private void deleteTermin(Message message, Long chatId) {
 
         String parseString = message.getText();
 
-        Long terminId = Long.valueOf(parseString);
+        List<String> parser =List.of(parseString.split(", "));
 
-        System.out.println(terminId);
-        Optional<Termin> termin = terminRepository.findById(terminId);
+        for (String termStrId : parser) {
+            Long terminId = Long.valueOf(termStrId);
 
-        String answer="deleted termin: " + termin.get().getId() + " " + termin.get().getTerminName();
+            System.out.println(terminId);
+            Optional<Termin> termin = terminRepository.findById(terminId);
 
-        terminRepository.deleteById(terminId);
-        buildMessage(chatId, answer);
-        log.info(answer);
-        selectedCommands.clear();
-    }
-    private void addTermin(long chatId, String terminName, String terminDate, String terminTime ) {
-        if (userRepository.findById(chatId).isPresent()) {
-            Optional<User> user;
-            user = Optional.of(userRepository.findById(chatId).get());
-            Termin termin = Termin.builder()
-                    .user(user.get())
-                    .terminName(terminName)
-                    .terminDate(terminDate)
-                    .terminTime(terminTime)
-                    .createdAt(new Timestamp(System.currentTimeMillis()))
-                    .build();
-            terminRepository.save(termin);
+            String answer = "deleted termin: " + termin.get().getId() + " " + termin.get().getTerminName();
 
-            String answer = user.get().getUserName() + " Termin saved: " + terminName;
-            log.info(answer);
+            terminRepository.deleteById(terminId);
             buildMessage(chatId, answer);
+            log.info(answer);
+            selectedCommands.clear();
         }
     }
+    private void deleteOneReminder(Message message, long chatId) {
+        String parseString = message.getText();
+
+        List<String> parser =List.of(parseString.split(", "));
+
+        for (String remStrId : parser) {
+
+            Long reminderId = Long.valueOf(remStrId);
+
+            Optional<Reminder> reminder = reminderRepository.findById(reminderId);
+
+            String answer = "deleted Reminder: " + reminder.get().getId() + " " + reminder.get().getReminderTittle() + " " + reminder.get().getReminderTime();
+
+            reminderRepository.deleteById(reminderId);
+            buildMessage(chatId, answer);
+            log.info(answer);
+            selectedCommands.clear();
+        }
+    }
+    private void deleteBirthday(Message message, long chatId) {
+        String parseString = message.getText();
+
+        List<String> parser =List.of(parseString.split(", "));
+
+        for (String birdStrId : parser) {
+            Long birthdayId = Long.valueOf(birdStrId);
+
+            Optional<Birthday> birthday = birthdayRepository.findById(birthdayId);
+
+            String answer = "deleted Birthday: " + birthday.get().getId() + " " + birthday.get().getBirthdayFirstName() + " " + birthday.get().getBirthdayLarstName();
+
+            birthdayRepository.deleteById(birthdayId);
+            buildMessage(chatId, answer);
+            log.info(answer);
+            selectedCommands.clear();
+        }
+    }
+
     //UserFunk
     private void myDataUser(long chatId) {
         String answer ="";
@@ -610,18 +667,33 @@ public class Bot extends TelegramLongPollingBot {
             List<Termin> termins = terminRepository.findByUserId(chatId);
             List<Birthday> birthdays = birthdayRepository.findByUserId(chatId);
             List<Reminder> reminders = reminderRepository.findByUserId(chatId);
-            answer= "this is your saved data\n" +
-                    "user: " + user.get().getUserName() +"\n" +
-                    "Firstname: " + user.get().getFirstName() +"\n"+
-                    "Lastname: " + user.get().getLastName() +"\n" +
-                    "Region: " + user.get().getRegion() +"\n" +
-                    "registered: " + user.get().getRegisteredAt() +"\n" +
-                    "You have saved  Termins: " +  termins.size() + " \n" + "show all Termins /showtermin "+"\n" +
-                    "You have saved  Birthdays: " +  birthdays.size() + " \n" + "show all Birthdays /showbirthday "+"\n" +
-                    "You have saved  Reminders: " +  reminders.size() + " \n" + "show all Reminders /showreminder "+"\n" +
 
+            String userNameInfo = user.get().getUserName().equalsIgnoreCase("null") ? "your username null, please set you /username":
+                    "user: " + user.get().getUserName() + " | Edit /username";
+            String firstNameInfo = user.get().getFirstName().equalsIgnoreCase("null") ? "your Firstname null, please set you /firstname":
+                    "Firstname: " + user.get().getFirstName() + " | Edit /firstname";
+            String lastNameInfo = user.get().getLastName().equalsIgnoreCase("null") ? "your lastname null, please set you /lastname":
+                    "Lastname: " + user.get().getLastName() + " | Edit /lastname";
+
+
+            String terminInfo = !termins.isEmpty() ? "You have saved  Termins: " + termins.size() + " \n" + "show all Termins /showtermin \n" :
+                    "You have not Termins, ADD  /newtermin \n";
+            String birthdayInfo = !birthdays.isEmpty() ? "You have saved  Birthdays: " +  birthdays.size() + " \n" + "show all Birthdays /showbirthday "+"\n" :
+                    "You have not Birthdays, ADD  /newbirthday \n";
+            String reminderInfo = !reminders.isEmpty() ? "You have saved  Reminders: " +  reminders.size() + " \n" + "show all Reminders /showreminder "+"\n" :
+                    "You have not Reminders, ADD  /newreminder \n";
+
+
+            answer= "this is your saved data\n" +
+                    userNameInfo + " \n" +
+                    firstNameInfo +" \n"+
+                    lastNameInfo +" \n"+
+                    "Region: " + user.get().getRegion() + " set you /setregion for your correctly Time" + "\n" +
+                    "registered: " + user.get().getRegisteredAt() +"\n"
+                    +terminInfo+birthdayInfo+reminderInfo+
                     "\n" +
                     "if you want to delete click /deleteuserdata";
+
             log.info("Show UserData: " + user.get().getUserName()
                     + ", " + user.get().getFirstName()
                     + ", " + user.get().getLastName()
@@ -637,7 +709,6 @@ public class Bot extends TelegramLongPollingBot {
         }
         buildMessage(chatId, answer);
     }
-
     private void deleteUserData(Long chatId, String messageText){
 
         if (containsDigitsRegex(messageText)) {
@@ -695,6 +766,7 @@ public class Bot extends TelegramLongPollingBot {
                     .firstName(chat.getFirstName())
                     .lastName(chat.getLastName())
                     .userName(chat.getUserName())
+                    .region("null")
                     .registeredAt(new Timestamp(System.currentTimeMillis()))
                     .build();
             userRepository.save(user);
@@ -702,7 +774,52 @@ public class Bot extends TelegramLongPollingBot {
             buildMessage(chatId, "User save: " + user.getUserName());
         }
     }
-    private void setUserRegion(Message message, long chatId) {
+    private void setUsername(long chatId, Message message) {
+        Optional<User> user = userRepository.findById(chatId);
+        String userName =message.getText();
+        if (!userName.isEmpty()) {
+            user.get().setUserName(userName);
+            userRepository.save(user.get());
+
+            String answer = "User: " +user.get().getUserName() + " set Username: " + userName;
+            buildMessage(chatId, answer);
+            log.info(answer);
+
+        }
+
+        selectedCommands.clear();
+    }
+    private void setfirstname(long chatId, Message message) {
+        Optional<User> user = userRepository.findById(chatId);
+        String firstName = message.getText();
+        if (!firstName.isEmpty()) {
+            user.get().setFirstName(firstName);
+            userRepository.save(user.get());
+
+            String answer = "User: " +user.get().getUserName() + " set Firstname: " + firstName;
+            buildMessage(chatId, answer);
+            log.info(answer);
+
+        }
+
+        selectedCommands.clear();
+    }
+    private void setLastname(long chatId, Message message) {
+        Optional<User> user = userRepository.findById(chatId);
+        String lastName = message.getText();
+        if (!lastName.isEmpty()) {
+            user.get().setLastName(lastName);
+            userRepository.save(user.get());
+
+            String answer = "User: " +user.get().getUserName() + " set Lastname: " + lastName;
+            buildMessage(chatId, answer);
+            log.info(answer);
+
+        }
+
+        selectedCommands.clear();
+    }
+     private void setUserRegion(Message message, long chatId) {
         Optional<User> user = userRepository.findById(chatId);
         String region = message.getText();
         if (!region.isEmpty()) {
@@ -722,8 +839,17 @@ public class Bot extends TelegramLongPollingBot {
         log.info("Replied to user: ");
         buildMessage(chatId, HELP_TEXT_START);
     }
-    private void start(long chatId, String userName){
-        String answer = "Hi. " + userName + " nice to meet you";
+    private void start(long chatId ){
+
+        Optional<User> user = userRepository.findById(chatId);
+
+        String userName = user.get().getUserName();
+        String setRegion = user.get().getRegion().equalsIgnoreCase("null") ?
+                "Please set you Region for correctly time! /setregion" : "";
+
+        String answer = user.get().getUserName().equalsIgnoreCase("null") ? "HI, your username is null, please set you /username" + setRegion :
+                "Hi. " + userName + " nice to meet you.\n"+setRegion;
+
         log.info("Replied to user: " + userName);
         buildMessage(chatId,answer);
     }
@@ -735,7 +861,7 @@ public class Bot extends TelegramLongPollingBot {
 
 
 
-   // @Scheduled(cron = ("* */1 * * * *"))
+   @Scheduled(cron = ("* */1 * * * *"))
     private void reminderSender(){
         List<Reminder> allReminders = reminderRepository.findAll();
         List<Integer> reminderDays = new ArrayList<>();
@@ -745,8 +871,6 @@ public class Bot extends TelegramLongPollingBot {
 
                 LocalDate localDate = LocalDate.now();
                 LocalTime localTime = LocalTimeNow(reminder.getUser().getId());
-
-                System.out.println(localTime.getHour());
 
                 List<String> days = List.of(reminder.getReminderDays().split(" "));
                 for (String day : days){
@@ -761,7 +885,9 @@ public class Bot extends TelegramLongPollingBot {
                 LocalTime reminderTimeMin10 = reminderTime.minusMinutes(10);
                 LocalTime reminderTimeMin15 = reminderTime.minusMinutes(15);
 
-                int weekDayNow = localDate.getDayOfWeek().getValue() + 1;
+                int weekDayNow = localDate.getDayOfWeek().getValue();
+
+
 
                 if (
                         reminderDays.contains(weekDayNow)
@@ -812,14 +938,13 @@ public class Bot extends TelegramLongPollingBot {
                     log.info(answer);
                 }
 
-
+            reminderDays.clear();
 
             }
         }
     }
 
-    // @Scheduled(cron = ("* */1 * * * *"))
-
+    @Scheduled(cron = ("* */1 * * * *"))
     private void terminSender() {
 
         List<Termin> allTermins = terminRepository.findAll();
@@ -876,18 +1001,15 @@ public class Bot extends TelegramLongPollingBot {
             }
         }
     }
-   // @Scheduled(cron = "0 00 19 * * *")
-
+   @Scheduled(cron = "0 00 19 * * *")
     private void birthdaySender1(){
         buildBirthdayScheduler("Tomorrow is ", 1);
     }
-    //@Scheduled(cron = "0 00 08 * * *")
-
+    @Scheduled(cron = "0 00 08 * * *")
     private void birthdaySender2(){
         buildBirthdayScheduler("Today is ", 0);
     }
-    //@Scheduled(cron = "0 00 15 * * *")
-
+    @Scheduled(cron = "0 00 15 * * *")
     private void birthdaySender3(){
         buildBirthdayScheduler("Today is ", 0);
     }
@@ -973,7 +1095,6 @@ public class Bot extends TelegramLongPollingBot {
         Map<String, Integer> regions = new HashMap<>();
 
         regions.put("Russia", +russianHours);
-        regions.put("Ukraina", -1);
         regions.put("Germany", 0);
 
         return regions;
