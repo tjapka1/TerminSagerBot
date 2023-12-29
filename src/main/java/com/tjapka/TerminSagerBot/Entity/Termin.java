@@ -23,6 +23,8 @@ public class Termin {
     private String terminDate;
     @Column(name = "termin_time")
     private String terminTime;
+    @Column(name = "termin_min_minuts")
+    private String terminMinusMin;
     @Column(name = "created_at")
     private Timestamp createdAt;
     @ManyToOne( )

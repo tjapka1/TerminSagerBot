@@ -23,9 +23,12 @@ public class Reminder {
     private String reminderTime;
     @Column(name = "reminder_days")
     private String reminderDays;
+    @Column(name = "reminder_min_minuts")
+    private String reminderMinusMin;
+
     @Column(name = "created_at")
     private Timestamp createdAt;
-    @ManyToOne()
+        @ManyToOne()
     @JoinColumn(name = "user_id" )
     private User user;
 

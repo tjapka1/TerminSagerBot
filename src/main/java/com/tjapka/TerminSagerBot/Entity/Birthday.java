@@ -19,7 +19,7 @@ import java.sql.Timestamp;
         @Column(name = "birthday_firstname")
         private String birthdayFirstName;
         @Column(name = "birthday_lastname")
-        private String birthdayLarstName;
+        private String birthdayLastName;
         @Column(name = "birthday_date")
         private String birthdayDate;
         @Column(name = "created_at")
