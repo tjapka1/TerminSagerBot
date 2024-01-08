@@ -22,6 +22,8 @@ import java.sql.Timestamp;
         private String birthdayLastName;
         @Column(name = "birthday_date")
         private String birthdayDate;
+        @Column(name = "birthday_min_day")
+        private String birthdayMinusDay;
         @Column(name = "created_at")
         private Timestamp createdAt;
         @ManyToOne()
