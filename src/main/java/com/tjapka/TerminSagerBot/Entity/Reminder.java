@@ -28,7 +28,7 @@ public class Reminder {
 
     @Column(name = "created_at")
     private Timestamp createdAt;
-        @ManyToOne()
+    @ManyToOne()
     @JoinColumn(name = "user_id" )
     private User user;
 
