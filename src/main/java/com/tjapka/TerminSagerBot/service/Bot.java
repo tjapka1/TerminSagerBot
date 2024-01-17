@@ -17,7 +17,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -643,11 +642,7 @@ public class Bot extends TelegramLongPollingBot {
             case "/redittime":
                 buildMessage(chatId, "Please enter your Reminder new time");
                 break;
-            case "/deletethisreminder":
-                break;
-            case "/onrem":
-                break;
-            case "/offrem":
+            case "/deletethisreminder", "/offrem", "/onrem":
                 break;
             case "/reditdays":
                 buildMessage(chatId, """
@@ -1806,11 +1801,7 @@ public class Bot extends TelegramLongPollingBot {
 
 
         }
-        if (timesList.size() == trueCount) {
-            res = true;
-        } else {
-            res = false;
-        }
+        res = timesList.size() == trueCount;
 
         return res;
     }
@@ -1868,7 +1859,6 @@ public class Bot extends TelegramLongPollingBot {
             for (Reminder reminder : allReminders) {
 
                 LocalDate localDate = LocalDate.now();
-                LocalTime localTime = localTimeNow(reminder.getUser().getId());
 
                 List<String> days = List.of(reminder.getReminderDays().split(" "));
                 for (String day : days) {
@@ -1889,7 +1879,7 @@ public class Bot extends TelegramLongPollingBot {
 
                 int weekDayNow = localDate.getDayOfWeek().getValue();
 
-                sendReminder(reminder, minusMinSort, reminderTime, reminderDays, weekDayNow, localTime);
+                sendReminder(reminder, minusMinSort, reminderTime, reminderDays, weekDayNow);
 
                 reminderDays.clear();
 
@@ -1904,7 +1894,7 @@ public class Bot extends TelegramLongPollingBot {
             for (Termin termin : allTermins) {
 
                 LocalDate localDate = LocalDate.now();
-                LocalTime localTime = localTimeNow(termin.getUser().getId());
+
 
                 List<String> dateParse = List.of(termin.getTerminDate().split("\\."));
                 List<String> timeParse = List.of(termin.getTerminTime().split(":"));
@@ -1918,7 +1908,7 @@ public class Bot extends TelegramLongPollingBot {
                 } else {
                     minusMinSort = sortedList("05 10 15");
                 }
-                sendTermin(termin, minusMinSort, terminTime, localDate, terminDate, localTime);
+                sendTermin(termin, minusMinSort, terminTime, localDate, terminDate);
             }
         }
     }
@@ -1928,7 +1918,6 @@ public class Bot extends TelegramLongPollingBot {
         LocalDate expectedDay;
         LocalDate localDate = LocalDate.now();
         String terminForDaysTime;
-        List<String> parseTime;
         if (!allTermins.isEmpty()) {
             for (Termin termin : allTermins) {
                 Optional<User> user = userRepository.findById(termin.getUser().getId());
@@ -2114,7 +2103,7 @@ public class Bot extends TelegramLongPollingBot {
 
 
 
-    private void sendReminder(Reminder reminder, List<String> minusMinSort, LocalTime reminderTime, List<Integer> reminderDays, int weekDayNow, LocalTime localTime) {
+    private void sendReminder(Reminder reminder, List<String> minusMinSort, LocalTime reminderTime, List<Integer> reminderDays, int weekDayNow) {
         int count = 0;
         for (String minuts : minusMinSort) {
             LocalTime reminderTimeMin;
@@ -2153,7 +2142,7 @@ public class Bot extends TelegramLongPollingBot {
 
     }
 
-    private void sendTermin(Termin termin, List<String> minusMinSort, LocalTime terminTime, LocalDate localDate, LocalDate terminDate, LocalTime localTime) {
+    private void sendTermin(Termin termin, List<String> minusMinSort, LocalTime terminTime, LocalDate localDate, LocalDate terminDate) {
         int count = 0;
 
         for (String s : minusMinSort) {
@@ -2312,7 +2301,7 @@ public class Bot extends TelegramLongPollingBot {
 
         String dayBoolean;
         String monthBoolean;
-        String yearBoolean;
+        //String yearBoolean;
         String spliterBoolean;
 
         String day;
@@ -2443,10 +2432,8 @@ public class Bot extends TelegramLongPollingBot {
 
 
         spliter = switch (spliterCheck) {
-            case ";" -> ":";
-            case ":" -> ":";
-            case "\\." -> ":";
-            default -> spliter;
+            case ";", "\\.", ":" -> ":";
+            default -> null;
         };
 
         if (Integer.parseInt(hourCheck) >= 0 && Integer.parseInt(hourCheck) < 24) {
