@@ -17,6 +17,8 @@ public class Reminder {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "reminder_id", unique = true)
     private Long id;
+    @Column(name = "reminder_onoff")
+    private String reminderOnOff;
     @Column(name = "reminder_tittle")
     private String reminderTittle;
     @Column(name = "reminder_time")
