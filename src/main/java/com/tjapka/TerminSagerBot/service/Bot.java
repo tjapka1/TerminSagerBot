@@ -1,10 +1,13 @@
 package com.tjapka.TerminSagerBot.service;
 
 import java.sql.Timestamp;
+import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.Period;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -18,6 +21,7 @@ import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -73,6 +77,8 @@ public class Bot extends TelegramLongPollingBot {
     static List<String> selectedCommands = new ArrayList<>();
     static List<String> entityId = new ArrayList<>();
     static List<MessageToSend> messageStack = new ArrayList<>();
+
+    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm");
 
 
     public Bot(BotConfig config) {
@@ -1518,6 +1524,9 @@ public class Bot extends TelegramLongPollingBot {
                     "Termin reminders will come at: " + user.get().getTerminFordaysTime() + " | Edit /teditforeverydaystime" :
                     "Termin reminders will come at: 18:00 | Edit /teditforeverydaystime";
 
+            LocalTime localTime = localTimeNow(chatId);
+
+
             answer = "this is your saved data\n" +
                     "----------------------------" + " \n" +
                     id + " \n" +
@@ -1526,6 +1535,7 @@ public class Bot extends TelegramLongPollingBot {
                     lastNameInfo + " \n" +
 
                     "----------------------------" + " \n" +
+                    "You Time: " + dtf.format(localTime) + " \n" +
 
                     "Region: " + user.get().getRegion() + "\n set you /setregion for your correctly Time" + "\n" +
                     "----------------------------" + " \n" +
@@ -2105,41 +2115,51 @@ public class Bot extends TelegramLongPollingBot {
 
     private void sendReminder(Reminder reminder, List<String> minusMinSort, LocalTime reminderTime, List<Integer> reminderDays, int weekDayNow) {
         int count = 0;
+        LocalTime reminderTimeMin;
         for (String minuts : minusMinSort) {
-            LocalTime reminderTimeMin;
             reminderTimeMin = minuts.equals("0") ? reminderTime : reminderTime.minusMinutes(Integer.parseInt(minuts));
 
-            if (reminder.getReminderOnOff() == null || reminder.getReminderOnOff().equalsIgnoreCase("on") || reminder.getReminderOnOff().equalsIgnoreCase("null")) {
-                if (reminderDays.contains(weekDayNow)) {
-                    Long chatId = reminder.getUser().getId();
+            if (
+                    reminder.getReminderOnOff() == null
+                            || reminder.getReminderOnOff().equalsIgnoreCase("on")
+                            || reminder.getReminderOnOff().equalsIgnoreCase("null")) {
 
-                    String answer = "In " + minuts + " minutes it will be | " + reminder.getReminderTittle() + " | at " + reminder.getReminderTime() + " o'clock.";
-                    messageStack.add(MessageToSend.builder()
-                            .chatId(chatId)
-                            .messageTyp("Reminder")
-                            .messageToSend(answer)
-                            .messageToLog("")
-                            .time(reminderTimeMin)
-                            .build());
-                }
-                count++;
-            }
-            if (minusMinSort.isEmpty() || minusMinSort.get(0).equals("0") || minusMinSort.size() == count) {
-                if (reminderDays.contains(weekDayNow)) {
-                    Long chatId = reminder.getUser().getId();
-                    String answer = "Now " + reminder.getReminderTittle() + " " + reminder.getReminderTime();
-                    messageStack.add(MessageToSend.builder()
-                            .chatId(chatId)
-                            .messageTyp("Reminder")
-                            .messageToSend(answer)
-                            .messageToLog(answer)
-                            .time(reminderTime)
-                            .build());
+                    if (reminderDays.contains(weekDayNow)) {
+                        Long chatId = reminder.getUser().getId();
 
+                        if ( !minusMinSort.get(0).equals("0") ){
+                            String answer = "In " + minuts + " minutes it will be | " + reminder.getReminderTittle() + " | at " + reminder.getReminderTime() + " o'clock.";
+                            messageStack.add(MessageToSend.builder()
+                                    .chatId(chatId)
+                                    .messageTyp("Reminder")
+                                    .messageToSend(answer)
+                                    .messageToLog("")
+                                    .time(reminderTimeMin)
+                                    .build());
+                        }
+                    }
+                    count++;
+
+
+                if (
+                        minusMinSort.isEmpty()
+                                || minusMinSort.get(0).equals("0")
+                                || minusMinSort.size() == count) {
+                    if (reminderDays.contains(weekDayNow)) {
+                        Long chatId = reminder.getUser().getId();
+                        String answer = "Now " + reminder.getReminderTittle() + " " + reminder.getReminderTime();
+                        messageStack.add(MessageToSend.builder()
+                                .chatId(chatId)
+                                .messageTyp("Reminder")
+                                .messageToSend(answer)
+                                .messageToLog(answer)
+                                .time(reminderTime)
+                                .build());
+
+                    }
                 }
             }
         }
-
     }
 
     private void sendTermin(Termin termin, List<String> minusMinSort, LocalTime terminTime, LocalDate localDate, LocalDate terminDate) {
@@ -2152,6 +2172,8 @@ public class Bot extends TelegramLongPollingBot {
 
             if (
                     ChronoUnit.DAYS.between(localDate, terminDate) == 0
+
+
             ) {
                 Long chatId = termin.getUser().getId();
                 String answer = termin.getTerminName() + "\nIn " + s + " minutes it will be" + "\nat " + termin.getTerminTime() + " o'clock\nDate: " + termin.getTerminDate();
