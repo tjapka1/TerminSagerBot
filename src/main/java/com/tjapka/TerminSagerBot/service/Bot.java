@@ -1,27 +1,18 @@
 package com.tjapka.TerminSagerBot.service;
 
 import java.sql.Timestamp;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -502,11 +493,7 @@ public class Bot extends TelegramLongPollingBot {
                 clearSelectedcommend();
                 break;
             case "/setregion":
-                buildMessage(chatId, """
-                        please set your region\s
-                        Russia
-                        Germany"""
-                );
+                buildMessage(chatId, "please set your region\n"+ regionsMapToString(getRegionsMap()));
                 break;
             case "/deleteuserdata":
                 Optional<User> user = Optional.of(userRepository.findById(chatId).get());
@@ -679,7 +666,7 @@ public class Bot extends TelegramLongPollingBot {
 
         List<String> parser = List.of(parseString.split(", "));
 
-        String terminName = parser.get(0).trim();
+        String terminName = wordFirstCharToLower(parser.get(0).trim());
         String dateCheck = parser.get(1).trim();
         String timeCheck = parser.get(2).trim();
 
@@ -715,8 +702,8 @@ public class Bot extends TelegramLongPollingBot {
 
         List<String> parser = List.of(parseString.split(", "));
 
-        String firstName = parser.get(0).trim();
-        String lastName = parser.get(1).trim();
+        String firstName = wordFirstCharToLower(parser.get(0).trim());
+        String lastName = wordFirstCharToLower(parser.get(1).trim());
         String dataCheck = parser.get(2).trim();
 
 
@@ -740,7 +727,7 @@ public class Bot extends TelegramLongPollingBot {
 
         List<String> parser = List.of(parseString.split(", "));
 
-        String reminderTittle = parser.get(0).trim();
+        String reminderTittle = wordFirstCharToLower(parser.get(0).trim());
         String reminderDaysCheck = parser.get(1).trim();
         String reminderDays;
 
@@ -869,7 +856,6 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
-    // TODO: 17.01.2024 s
     private void showAllTermins(long chatId) {
         List<Termin> userTermins = terminRepository.findByUserId(chatId);
         List<Termin> sortedList = userTermins.stream()
@@ -952,10 +938,10 @@ public class Bot extends TelegramLongPollingBot {
 
     }
 
-    private void editRemindermindName(long chatId, String editremindermind, String messageText) {
+    private void editRemindermindName(long chatId, String editremindermind, String reminderName) {
         Optional<Reminder> reminder = reminderRepository.findById(Long.parseLong(editremindermind));
-        if (!messageText.isEmpty()) {
-            reminder.get().setReminderTittle(messageText);
+        if (!reminderName.isEmpty()) {
+            reminder.get().setReminderTittle(wordFirstCharToLower(reminderName));
             reminderRepository.save(reminder.get());
 
             String answer = "reminder edit name: " + reminder.get().getReminderTittle() + "\n" +
@@ -1081,7 +1067,7 @@ public class Bot extends TelegramLongPollingBot {
     private void editBirthdayFirstname(long chatId, String birthdayId, String firstName) {
         Optional<Birthday> birthday = birthdayRepository.findById(Long.parseLong(birthdayId));
         if (!firstName.isEmpty()) {
-            birthday.get().setBirthdayFirstName(firstName);
+            birthday.get().setBirthdayFirstName(wordFirstCharToLower(firstName));
             birthdayRepository.save(birthday.get());
 
             String answer = "birthday edit Firstname: " + birthday.get().getBirthdayFirstName() + "\n" +
@@ -1098,7 +1084,7 @@ public class Bot extends TelegramLongPollingBot {
     private void editBirthdayLastname(long chatId, String birthdayId, String lastName) {
         Optional<Birthday> birthday = birthdayRepository.findById(Long.parseLong(birthdayId));
         if (!lastName.isEmpty()) {
-            birthday.get().setBirthdayLastName(lastName);
+            birthday.get().setBirthdayLastName(wordFirstCharToLower(lastName));
             birthdayRepository.save(birthday.get());
 
             String answer = "birthday edit Lastname: " + birthday.get().getBirthdayLastName() + "\n" +
@@ -1623,8 +1609,8 @@ public class Bot extends TelegramLongPollingBot {
 
             User user = User.builder()
                     .id(chatId)
-                    .firstName(chat.getFirstName())
-                    .lastName(chat.getLastName())
+                    .firstName(wordFirstCharToLower(chat.getFirstName()))
+                    .lastName(wordFirstCharToLower(chat.getLastName()))
                     .userName(chat.getUserName())
                     .region("null")
                     .terminFordaysTime("18:00")
@@ -1658,7 +1644,7 @@ public class Bot extends TelegramLongPollingBot {
         Optional<User> user = userRepository.findById(chatId);
         String firstName = message.getText();
         if (!firstName.isEmpty()) {
-            user.get().setFirstName(firstName);
+            user.get().setFirstName(wordFirstCharToLower(firstName));
             userRepository.save(user.get());
 
             String answer = "User: " + user.get().getUserName() + " set Firstname: " + firstName;
@@ -1674,7 +1660,7 @@ public class Bot extends TelegramLongPollingBot {
         Optional<User> user = userRepository.findById(chatId);
         String lastName = message.getText();
         if (!lastName.isEmpty()) {
-            user.get().setLastName(lastName);
+            user.get().setLastName(wordFirstCharToLower(lastName));
             userRepository.save(user.get());
 
             String answer = "User: " + user.get().getUserName() + " set Lastname: " + lastName;
@@ -1817,21 +1803,56 @@ public class Bot extends TelegramLongPollingBot {
     }
 
 
-    private void setUserRegion(Message message, long chatId) {
+    private void setUserRegion(Message region, long chatId) {
         Optional<User> user = userRepository.findById(chatId);
-        String region = message.getText();
-        if (!region.isEmpty()) {
-            user.get().setRegion(region);
-            userRepository.save(user.get());
+        String regionCheck = region.getText();
 
-            String answer = "User: " + user.get().getUserName() + " set region: " + region;
-            buildMessage(chatId, answer);
-            log.info(answer);
+        Map<String, Integer> regionsMap = getRegionsMap();
+
+
+        if (!regionCheck.isEmpty()) {
+            String regionsFirstToLower = wordFirstCharToLower(regionCheck);
+
+
+            if (regionsMap.containsKey(regionsFirstToLower)) {
+
+                user.get().setRegion(regionsFirstToLower);
+                userRepository.save(user.get());
+
+                String answer = "User: " + user.get().getUserName() + " set region: " + regionsFirstToLower;
+                buildMessage(chatId, answer);
+                log.info(answer);
+                myDataUser(chatId);
+            }else {
+                String answer = "User: " + user.get().getUserName() + " set false region: " + regionsFirstToLower + "\n" +
+                        regionsMapToString(regionsMap) +"\n"+
+                        "/setregion";
+
+                buildMessage(chatId, answer);
+                log.info(answer);
+
+            }
 
         }
-        myDataUser(chatId);
         clearSelectedcommend();
 
+    }
+
+    private String wordFirstCharToLower(String checkWord) {
+        boolean b = !checkWord.isEmpty() && Character.isUpperCase(checkWord.charAt(0));
+        if (b) {
+            return checkWord;
+        } else {
+            return Character.toUpperCase(checkWord.charAt(0)) + checkWord.substring(1);
+        }
+    }
+
+    private static String regionsMapToString(Map<String, Integer> regionsMap) {
+        List <String> regionList = new ArrayList<>();
+        for (Map.Entry<String, Integer> regionEntry : regionsMap.entrySet()) {
+            regionList.add(regionEntry.getKey());
+        }
+        return String.join("\n", regionList );
     }
 
     //StartFunk
@@ -2512,33 +2533,23 @@ public class Bot extends TelegramLongPollingBot {
     //Date
     protected LocalTime localTimeNow(Long chatId) {
         Map<String, Integer> regions = getRegionsMap();
-
         Optional<User> user = userRepository.findById(chatId);
-
-
         if (regions.containsKey(user.get().getRegion())) {
             return LocalTime.now().plusHours(regions.get(user.get().getRegion()));
         }
-
         return LocalTime.now().plusHours(regions.get("Germany"));
-
     }
 
     private static Map<String, Integer> getRegionsMap() {
         int russianHours = getRussianHours();
-
-
         Map<String, Integer> regions = new HashMap<>();
-
         regions.put("Russia", +russianHours);
         regions.put("Germany", 0);
-
         return regions;
     }
 
     private static int getRussianHours() {
         LocalDate localDate = LocalDate.now();
-
         int letsSundayNov = getLetsSunday(localDate.getYear(), Calendar.NOVEMBER);
         int letsSundayMarch = getLetsSunday(localDate.getYear(), Calendar.MARCH);
 
