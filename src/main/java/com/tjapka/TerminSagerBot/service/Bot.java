@@ -729,8 +729,9 @@ public class Bot extends TelegramLongPollingBot {
 
         String reminderTittle = wordFirstCharToLower(parser.get(0).trim());
         String reminderDaysCheck = parser.get(1).trim();
-        String reminderDays;
+        String timeCheck = parser.get(2).trim();
 
+        String reminderDays;
         if (reminderDaysCheck.equalsIgnoreCase("all")) {
             reminderDays = "1 2 3 4 5 6 7";
         } else if (reminderDaysCheck.equalsIgnoreCase("workdays")) {
@@ -741,7 +742,8 @@ public class Bot extends TelegramLongPollingBot {
             reminderDays = reminderDaysCheck;
         }
 
-        String timeCheck = parser.get(2).trim();
+        String dayChecked = reminderCheckDays(chatId, reminderDays);
+
 
         String checktimeAll = timeCheckFnk(chatId, timeCheck);
         List<String> timeTrueFalse = List.of(checktimeAll.split("&"));
@@ -749,16 +751,11 @@ public class Bot extends TelegramLongPollingBot {
         String setTime = timeTrueFalse.get(0);
 
         if (trueFalseTime.get(0).equals("true") && trueFalseTime.get(1).equals("true")) {
-
-
             String answer = "Use" +
                     "r: " + message.getFrom().getUserName() + " " +
-                    "created a new Reminder: " + reminderTittle + " " + reminderDays + " " + setTime;
-
-
+                    "created a new Reminder: " + reminderTittle + " " + dayChecked + " " + setTime;
             log.info(answer);
-            addReminder(chatId, reminderTittle, reminderDays, setTime);
-
+            addReminder(chatId, reminderTittle, dayChecked, setTime);
 
             if (trueFalseTime.get(0).equals("false") && trueFalseTime.get(1).equals("false")) {
                 String answerLog = "User set false Time";
@@ -767,6 +764,7 @@ public class Bot extends TelegramLongPollingBot {
         }
         selectedCommands.clear();
     }
+
 
     private void addTermin(long chatId, String terminName, String terminDate, String terminTime) {
         if (userRepository.findById(chatId).isPresent()) {
@@ -869,6 +867,7 @@ public class Bot extends TelegramLongPollingBot {
             for (Termin termin : sortedList) {
                 answer = answerTermin(termin);
                 buildMessage(chatId, answer);
+                
             }
             log.info("User show your List of all Termins: " + userTermins.size());
         } else {
@@ -1008,7 +1007,9 @@ public class Bot extends TelegramLongPollingBot {
                 reminderDays = messageText;
             }
 
-            reminder.get().setReminderDays(reminderDays);
+            String daysChecked = reminderCheckDays(chatId, reminderDays);
+
+            reminder.get().setReminderDays(daysChecked);
             reminderRepository.save(reminder.get());
 
             String answer = "reminder edit days: " + reminder.get().getReminderDays() + "\n" +
@@ -1022,6 +1023,38 @@ public class Bot extends TelegramLongPollingBot {
         clearSelectedcommend();
     }
 
+
+    private String reminderCheckDays(Long chatId, String reminderDays) {
+        List <String> checkDaysAll = List.of(reminderDays.trim().split(" "));
+        List <Integer> daysTrue = new ArrayList<>();
+        List <Integer> daysFalse = new ArrayList<>();
+        String res;
+
+        for (String day : checkDaysAll){
+            int dayInt = Integer.parseInt(day);
+            if (dayInt > 0 && dayInt < 8){
+                daysTrue.add(dayInt);
+            }else {
+                daysFalse.add(dayInt);
+
+            }
+        }
+        if (!daysFalse.isEmpty()) {
+            String dayf = daysFalse.toString().trim().replace("[", "").replace("]", "").replace(",", "");
+            String falseAnswer = "you entered the wrong days of the week!!! " + dayf;
+
+            buildMessage(chatId, falseAnswer);
+            log.error(chatId + falseAnswer);
+            daysFalse.clear();
+        }
+        if (daysTrue.isEmpty()){
+            daysTrue.addAll(List.of(1, 2, 3, 4, 5, 6, 7));
+        }
+
+        res = daysTrue.toString().trim().replace("[", "").replace("]", "").replace(",", "");
+
+        return res;
+    }
 
     private void onThisReminder(long chatId, String reminderId) {
         if (reminderRepository.findById(Long.parseLong(reminderId)).isPresent()) {
