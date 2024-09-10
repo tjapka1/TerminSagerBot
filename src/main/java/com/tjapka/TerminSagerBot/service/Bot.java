@@ -44,7 +44,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @PropertySource("sheduling.properties")
 public class Bot extends TelegramLongPollingBot {
-    static final String HELP_TEXT_START = """
+    static final String HELP_TEXT_START_ENGL = """
             This bot is created to demonstrate Spring capabilities.
 
             You can execute commands from the main menu on the left or by typing a command:\s
@@ -111,6 +111,7 @@ public class Bot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
+
             handleMessage(update.getMessage());
         }
 
@@ -121,13 +122,11 @@ public class Bot extends TelegramLongPollingBot {
         String userName = message.getFrom().getUserName();
         String fnkBTN = "";
 
-
         String messageTextCheck = message.getText();
         String messageText;
-        if (messageTextCheck.contains("@TjapkaTerminsager88bot")) {
+        if (messageTextCheck.contains("@TjapkaTerminsager88bot") || messageTextCheck.contains("@TjapkaTerminsager88Testbot")) {
             int i = messageTextCheck.indexOf("@");
             messageText = messageTextCheck.substring(0, i);
-
 
         } else {
             messageText = messageTextCheck;
@@ -245,7 +244,7 @@ public class Bot extends TelegramLongPollingBot {
         //------------------------------------------------
         List<String> fnkStart = List.of("/start", "/help");
         List<String> fnkUser = new ArrayList<>(List.of("/registrade", "/mydata"));
-        List<String> fnkUserQ = List.of("/setregion", "/deleteuserdata", "/username", "/firstname", "/lastname", "/beditforeverydaystime", "/beditfornowdaytime", "/teditforeverydaystime");
+        List<String> fnkUserQ = List.of("/setregion", "/setlanguage", "/deleteuserdata", "/username", "/firstname", "/lastname", "/beditforeverydaystime", "/beditfornowdaytime", "/teditforeverydaystime");
         fnkUser.addAll(fnkUserQ);
         List<String> fnkTermin = List.of("/newtermin", "/showtermin", "/deletetermin", "/deletethistermin", "/teditname", "/teditdate", "/teditminusmin", "/tedittime", "/teditfordays");
         List<String> fnkBirthDay = List.of("/newbirthday", "/showbirthday", "/deletebirthday", "/deletethisbirthday", "/beditfirstname", "/beditlastname", "/beditdate", "/beditfordays");
@@ -296,6 +295,9 @@ public class Bot extends TelegramLongPollingBot {
         }
         if (messageText.equals("/setregion")) {
             selectedCommands.add("/setregion");
+        }
+        if (messageText.equals("/setlanguage")) {
+            selectedCommands.add("/setlanguage");
         }
         if (messageText.equals("/deleteuserdata")) {
             selectedCommands.add("/deleteuserdata");
@@ -383,7 +385,7 @@ public class Bot extends TelegramLongPollingBot {
 
         } else if (!messageText.contains("/") && !fnkAll.contains(fnkCheck) && selectedCommands.isEmpty()) {
             //buildMessage(chatId, "Echo Answer: " + messageText );
-            log.info(userName + ": Type this message: " + messageText);
+            //log.info(userName + ": Type this message: " + messageText);
 
         } else if (!messageText.contains("/") && selectedCommands.get(0).equals("/newtermin")) {
             buildNewTermin(message, chatId);
@@ -409,6 +411,8 @@ public class Bot extends TelegramLongPollingBot {
             setfirstname(chatId, message);
         } else if (!messageText.contains("/") && selectedCommands.get(0).equals("/lastname")) {
             setLastname(chatId, message);
+        } else if (!messageText.contains("/") && selectedCommands.get(0).equals("/setlanguage")) {
+            setLanguage(chatId, message);
         } else if (!messageText.contains("/") && selectedCommands.get(0).equals("/beditforeverydaystime")) {
             setTimeForEveryDayBirthday(chatId, message);
         } else if (!messageText.contains("/") && selectedCommands.get(0).equals("/beditfornowdaytime")) {
@@ -465,27 +469,34 @@ public class Bot extends TelegramLongPollingBot {
 
     // TODO: 12.01.2024 userFunk switch
     private void userFunk(Message message, String messageText, long chatId, String userName) {
+        Optional<User> user = Optional.of(userRepository.findById(chatId).get());
         switch (messageText) {
             case "/registrade":
                 registerUser(message);
                 break;
             case "/username":
-                buildMessage(chatId, "Please enter your username.");
+                buildMessage(chatId, user.get().getLanguage().toLowerCase().equals("englisch") ? "Please enter your username." :
+                        user.get().getLanguage().toLowerCase().equals("russian") ? "Введите ваш ник" : "");
                 break;
             case "/firstname":
-                buildMessage(chatId, "Please enter your firstname.");
+                buildMessage(chatId, user.get().getLanguage().toLowerCase().equals("englisch") ? "Please enter your firstname." :
+                        user.get().getLanguage().toLowerCase().equals("russian") ? "Введите ваш Имя" : "");
                 break;
             case "/lastname":
-                buildMessage(chatId, "Please enter your lastname.");
+                buildMessage(chatId, user.get().getLanguage().toLowerCase().equals("englisch") ? "Please enter your lastname." :
+                        user.get().getLanguage().toLowerCase().equals("russian") ? "Введите вашу Фамилию" : "");
                 break;
             case "/beditforeverydaystime":
-                buildMessage(chatId, "Please enter time for birthday reminder ever Days.");
+                buildMessage(chatId, user.get().getLanguage().toLowerCase().equals("englisch") ? "Please enter time for birthday reminder ever Days." :
+                        user.get().getLanguage().toLowerCase().equals("russian") ? "Введите время когда будет приходить напоминание о дне рождение до его дня" : "");
                 break;
             case "/beditfornowdaytime":
-                buildMessage(chatId, "Please enter time for birthday reminder now Days.");
+                buildMessage(chatId, user.get().getLanguage().toLowerCase().equals("englisch") ? "Please enter time for birthday reminder now Days." :
+                        user.get().getLanguage().toLowerCase().equals("russian") ? "Введите время когда будет приходить напоминание о дне рождение в этот день" : "");
                 break;
             case "/teditforeverydaystime":
-                buildMessage(chatId, "Please enter time for termin reminder ever Days.");
+                buildMessage(chatId, user.get().getLanguage().toLowerCase().equals("englisch") ? "Please enter time for termin reminder ever Days." :
+                        user.get().getLanguage().toLowerCase().equals("russian") ? "Введите время когда будет приходить напоминание о Термине до его дня" : "");
                 break;
 
             case "/mydata":
@@ -493,15 +504,21 @@ public class Bot extends TelegramLongPollingBot {
                 clearSelectedcommend();
                 break;
             case "/setregion":
-                buildMessage(chatId, "please set your region\n"+ regionsMapToString(getRegionsMap()));
+                buildMessage(chatId, user.get().getLanguage().toLowerCase().equals("englisch") ? "please set your region\n" + regionsMapToString(getRegionsMap()) :
+                        user.get().getLanguage().toLowerCase().equals("russian") ? "Введите ваш регион\n" + regionsMapToString(getRegionsMap()) : "");
+                break;
+            case "/setlanguage":
+                buildMessage(chatId, user.get().getLanguage().toLowerCase().equals("englisch") ? "please set your language\nEnglish\nRussian" :
+                        user.get().getLanguage().toLowerCase().equals("russian") ? "Введите ваш язык\nEnglish\nRussian" : "");
                 break;
             case "/deleteuserdata":
-                Optional<User> user = Optional.of(userRepository.findById(chatId).get());
+
                 Long userId = user.get().getId();
                 String idLenght = userId.toString();
                 String userIdEit = userId.toString().substring(idLenght.length() - 4, idLenght.length());
                 long userIdCheck = Long.parseLong(userIdEit);
-                buildMessage(chatId, "do you want to delete all your data? \nPlease enter this number\n" + userIdCheck);
+                buildMessage(chatId, user.get().getLanguage().toLowerCase().equals("englisch") ? "do you want to delete all your data? \nPlease enter this number\n" + userIdCheck :
+                        user.get().getLanguage().toLowerCase().equals("russian") ? "Вы хотите Удалить все ваши данные? \nНаберите этот номмер\n" + userIdCheck : "");
                 break;
             default:
                 defaultComand(chatId, userName, messageText);
@@ -511,36 +528,46 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     private void terminFunk(String fnkBTN, long chatId, String userName) throws ParseException {
+        Optional<User> user = Optional.of(userRepository.findById(chatId).get());
         switch (fnkBTN) {
             case "/newtermin":
-                buildMessage(chatId, "Please enter your termin! \nExample:  \nTermin Name, Termin Date, Termin Time\nTermin Name, 00.00.0000, 00:00");
+                buildMessage(chatId, user.get().getLanguage().toLowerCase().equals("englisch") ? "Please enter your termin! \nExample:  \nTermin Name, Termin Date, Termin Time\nTermin Name, 00.00.0000, 00:00"
+                        : user.get().getLanguage().toLowerCase().equals("russian") ? "Введите ваш Термин! \nНапример: \nимя термина, дату термина, время термина \nИмя термина, 00.00.0000, 00:00" : "");
                 break;
             case "/showtermin":
-                showAllTermins(chatId);
+                showAllTermins(chatId, user.get().getLanguage());
                 break;
             case "/teditname":
-                buildMessage(chatId, "Please enter new Termin Name");
+                buildMessage(chatId, user.get().getLanguage().toLowerCase().equals("englisch") ? "Please enter new Termin Name" :
+                        user.get().getLanguage().toLowerCase().equals("russian") ? "Введите имя термина" : "");
                 break;
             case "/teditdate":
-                buildMessage(chatId, "Please enter new date for Termin");
+                buildMessage(chatId, user.get().getLanguage().toLowerCase().equals("englisch") ? "Please enter new date for Termin" :
+                        user.get().getLanguage().toLowerCase().equals("russian") ? "Введите Дату термина" : "");
                 break;
             case "/tedittime":
-                buildMessage(chatId, "Please enter new time for Termin");
+                buildMessage(chatId, user.get().getLanguage().toLowerCase().equals("englisch") ? "Please enter new time for Termin" :
+                        user.get().getLanguage().toLowerCase().equals("russian") ? "Введите время термина" : "");
                 break;
             case "/teditminusmin":
-                buildMessage(chatId, "Please enter Minutes for Terminn");
+                buildMessage(chatId, user.get().getLanguage().toLowerCase().equals("englisch") ? "Please enter Minutes for Terminn" :
+                        user.get().getLanguage().toLowerCase().equals("russian") ? "Введите за сколько минут до времени приходили напоминания" +
+                                "\nНапример 10 или 20, 10. \nЗа час надо писать в минутах например 60, 75, 120" : "");
                 break;
             case "/teditfordays":
-                buildMessage(chatId, "Please enter Days for Terminn");
+                buildMessage(chatId, user.get().getLanguage().toLowerCase().equals("englisch") ? "Please enter Days for Terminn" :
+                        user.get().getLanguage().toLowerCase().equals("russian") ? "Введите за сколько дней до дня термина приходили напоминания" : "");
                 break;
             case "/deletethistermin":
                 break;
             case "/deletetermin":
                 if (!terminRepository.findByUserId(chatId).isEmpty()) {
-                    showAllTermins(chatId);
-                    buildMessage(chatId, "Please enter your terminID Of delete");
+                    showAllTermins(chatId, user.get().getLanguage());
+                    buildMessage(chatId, user.get().getLanguage().toLowerCase().equals("englisch") ? "Please enter your terminID Of delete" :
+                            user.get().getLanguage().toLowerCase().equals("russian") ? "Введите ID термины которые хотите удалить" : "");
                 } else {
-                    buildMessage(chatId, "You have not Termins");
+                    buildMessage(chatId, user.get().getLanguage().toLowerCase().equals("englisch") ? "You have not Termins" :
+                            user.get().getLanguage().toLowerCase().equals("russian") ? "У вас нет Терминов" : "");
                     clearSelectedcommend();
                 }
                 break;
@@ -551,31 +578,45 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     private void birthDayFunk(String messageText, long chatId, String userName) {
+        Optional<User> user = Optional.of(userRepository.findById(chatId).get());
         switch (messageText) {
             case "/newbirthday":
-                buildMessage(chatId, "Please enter new Birthday! \nExample:  \nPerson Firstname, Person Lastname, Birthday Date\nExample Firstname, Example Lastname, 00.00.0000");
+                buildMessage(chatId, user.get().getLanguage().toLowerCase().equals("englisch") ? "Please enter new Birthday! " +
+                        "\nExample:  " +
+                        "\nPerson Firstname, Person Lastname, Birthday Date" +
+                        "\n\nExample Firstname, Example Lastname, 00.00.0000"
+                        : user.get().getLanguage().toLowerCase().equals("russian") ? "Введите новый день Рождения " +
+                        "\nНапример: " +
+                        "\nИмя, Фамилия, Дата " +
+                        "\n\nНе забывайте про запятые!!!!!!!!" : "");
                 break;
             case "/showbirthday":
-                showAllBirthday(chatId);
+                showAllBirthday(chatId, user.get().getLanguage());
                 break;
             case "/beditfirstname":
-                buildMessage(chatId, "Please enter Birthday new Firstname");
+                buildMessage(chatId, user.get().getLanguage().toLowerCase().equals("englisch") ? "Please enter Birthday new Firstname" :
+                        user.get().getLanguage().toLowerCase().equals("russian") ? "Введите имя человека" : "");
                 break;
             case "/beditlastname":
-                buildMessage(chatId, "Please enter Birthday new Lastname");
+                buildMessage(chatId, user.get().getLanguage().toLowerCase().equals("englisch") ? "Please enter Birthday new Lastname" :
+                        user.get().getLanguage().toLowerCase().equals("russian") ? "Введите фамилию человека" : "");
                 break;
             case "/beditdate":
-                buildMessage(chatId, "Please enter Birthday new Date");
+                buildMessage(chatId, user.get().getLanguage().toLowerCase().equals("englisch") ? "Please enter Birthday new Date" :
+                        user.get().getLanguage().toLowerCase().equals("russian") ? "Введите день рождения" : "");
                 break;
             case "/beditfordays":
-                buildMessage(chatId, "Please enter Birthday new days for Birthday");
+                buildMessage(chatId, user.get().getLanguage().toLowerCase().equals("englisch") ? "Please enter Birthday new days for Birthday" :
+                        user.get().getLanguage().toLowerCase().equals("russian") ? "Введите за сколько дней хотите получать уведомление" : "");
                 break;
             case "/deletebirthday":
                 if (!birthdayRepository.findByUserId(chatId).isEmpty()) {
-                    showAllBirthday(chatId);
-                    buildMessage(chatId, "Please enter your BirthDayID Of delete");
+                    showAllBirthday(chatId, user.get().getLanguage());
+                    buildMessage(chatId, user.get().getLanguage().toLowerCase().equals("englisch") ? "Please enter your BirthDayID Of delete" :
+                            user.get().getLanguage().toLowerCase().equals("russian") ? "Введите Id Дней Рождений которые хотите удалить" : "");
                 } else {
-                    buildMessage(chatId, "You have not Birthdays");
+                    buildMessage(chatId, user.get().getLanguage().toLowerCase().equals("englisch") ? "You have not Birthdays" :
+                            user.get().getLanguage().toLowerCase().equals("russian") ? "У вас Нет дней рождений" : "");
                     clearSelectedcommend();
                 }
                 break;
@@ -589,9 +630,10 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     private void reminderFunk(String messageText, long chatId, String userName) {
+        Optional<User> user = Optional.of(userRepository.findById(chatId).get());
         switch (messageText) {
             case "/newreminder":
-                buildMessage(chatId, """
+                buildMessage(chatId, user.get().getLanguage().toLowerCase().equals("englisch") ?"""
                         Please enter new Reminder!
                         WeekDays
                         1 = Monday
@@ -612,7 +654,31 @@ public class Bot extends TelegramLongPollingBot {
 
                         Reminder name, workdays, 00:00
 
-                        Reminder name, weekend, 00:00""");
+                        Reminder name, weekend, 00:00"""
+                                : user.get().getLanguage().toLowerCase().equals("russian") ?"""
+                        Введите ваш напоминатель
+                        
+                        Дни недели
+                        1 = Понедельник
+                        2 = Вторник
+                        3 = Среда
+                        4 = Четверг
+                        5 = Пятница
+                        6 = Суббота
+                        7 = Воскресенье
+                        all = для всех дней
+                        workdays = для робочих дней
+                        weekend = для выходных дней\s
+                        Например: \s
+                        Имя напоминаний, дни напоминаний, Время напоминаний
+                        Имя напоминаний, 1 3 5 6 , 00:00
+
+                        Имя напоминаний, all, 00:00
+
+                        Имя напоминаний, workdays, 00:00
+
+                        Имя напоминаний, weekend, 00:00""":""
+                        );
                 break;
             case "/showreminder":
                 showAllReminder(chatId);
@@ -620,25 +686,30 @@ public class Bot extends TelegramLongPollingBot {
             case "/deletereminder":
                 if (!reminderRepository.findByUserId(chatId).isEmpty()) {
                     showAllReminder(chatId);
-                    buildMessage(chatId, "Please enter your ReminderID Of delete");
+                    buildMessage(chatId, user.get().getLanguage().toLowerCase().equals("englisch") ? "Please enter your ReminderID Of delete" :
+                            user.get().getLanguage().toLowerCase().equals("russian") ?"Введите ID напоминаний которые хотите удалить":"");
                 } else {
-                    buildMessage(chatId, "You have not Birthdays");
+                    buildMessage(chatId, user.get().getLanguage().toLowerCase().equals("englisch") ?"You have not Reminder":
+                            user.get().getLanguage().toLowerCase().equals("russian") ?"У вас нет напоминаний":"");
                     clearSelectedcommend();
                 }
                 break;
             case "/reditminutes":
-                buildMessage(chatId, "Please enter your Reminder minutes");
+                buildMessage(chatId, user.get().getLanguage().toLowerCase().equals("englisch") ?"Please enter your Reminder minutes" :
+                        user.get().getLanguage().toLowerCase().equals("russian") ?"Введите минуты напоминания":"");
                 break;
             case "/reditname":
-                buildMessage(chatId, "Please enter your Reminder new name");
+                buildMessage(chatId, user.get().getLanguage().toLowerCase().equals("englisch") ?"Please enter your Reminder new name":
+                        user.get().getLanguage().toLowerCase().equals("russian") ?"Введите новое имя напоминания":"");
                 break;
             case "/redittime":
-                buildMessage(chatId, "Please enter your Reminder new time");
+                buildMessage(chatId, user.get().getLanguage().toLowerCase().equals("englisch") ?"Please enter your Reminder new time" :
+                        user.get().getLanguage().toLowerCase().equals("russian") ?"Введите новое время напоминания":"");
                 break;
             case "/deletethisreminder", "/offrem", "/onrem":
                 break;
             case "/reditdays":
-                buildMessage(chatId, """
+                buildMessage(chatId, user.get().getLanguage().toLowerCase().equals("englisch") ? """
                         Please enter your Reminder new days
 
                         WeekDays
@@ -651,7 +722,23 @@ public class Bot extends TelegramLongPollingBot {
                         7 = Sunday
                         all = for all WeekDays
                         workdays = for Work Days
-                        weekend = for Weekend Days""");
+                        weekend = for Weekend Days""" :
+                        user.get().getLanguage().toLowerCase().equals("russian") ?"""
+                        Введите новые дни напоминаний
+                        
+                        Дни недели
+                        1 = Понедельник
+                        2 = Вторник
+                        3 = Среда
+                        4 = Четверг
+                        5 = Пятница
+                        6 = Суббота
+                        7 = Воскресенье
+                        all = для всех дней
+                        workdays = для робочих дней
+                        weekend = для выходных дней\s
+                        
+                        """:"");
                 break;
             default:
                 defaultComand(chatId, userName, messageText);
@@ -768,9 +855,8 @@ public class Bot extends TelegramLongPollingBot {
 
     private void addTermin(long chatId, String terminName, String terminDate, String terminTime) {
         if (userRepository.findById(chatId).isPresent()) {
-            Optional<User> user;
+            Optional<User> user = Optional.of(userRepository.findById(chatId).get());
 
-            user = Optional.of(userRepository.findById(chatId).get());
             Termin termin = Termin.builder()
                     .user(user.get())
                     .terminName(terminName)
@@ -801,7 +887,8 @@ public class Bot extends TelegramLongPollingBot {
                         .build());
             }
 
-            String answer = user.get().getUserName() + " Termin saved!!!\n" + answerTermin(save);
+            String answer = user.get().getLanguage().toLowerCase().equals("englisch") ? user.get().getUserName() + " Termin saved!!!\n" + answerTermin(save, user.get().getLanguage())
+                    : user.get().getLanguage().toLowerCase().equals("russian") ? user.get().getUserName() + " Термин сохранён\n" + answerTermin(save, user.get().getLanguage()):"";
             String answerLog = user.get().getUserName() + " Termin saved: " + terminName;
             log.info(answerLog);
             buildMessage(chatId, answer);
@@ -810,8 +897,7 @@ public class Bot extends TelegramLongPollingBot {
 
     private void addBirthday(long chatId, String firstName, String lastName, String setDate) {
         if (userRepository.findById(chatId).isPresent()) {
-            Optional<User> user;
-            user = Optional.of(userRepository.findById(chatId).get());
+            Optional<User> user = Optional.of(userRepository.findById(chatId).get());
             Birthday birthday = Birthday.builder()
                     .birthdayFirstName(firstName)
                     .birthdayLastName(lastName)
@@ -822,7 +908,8 @@ public class Bot extends TelegramLongPollingBot {
                     .build();
             Birthday save = birthdayRepository.save(birthday);
 
-            String answer = user.get().getUserName() + " | Birthday saved!!!\n" + answerBirthday(save);
+            String answer = user.get().getLanguage().toLowerCase().equals("englisch") ? user.get().getUserName() + " | Birthday saved!!!\n" + answerBirthday(save, user.get().getLanguage())
+                    : user.get().getLanguage().toLowerCase().equals("russian") ? user.get().getUserName() + " | День Рождения сохранён!!!\n" + answerBirthday(save, user.get().getLanguage()):"";
             String answerLog = user.get().getUserName() + " | Birthday saved: " + firstName + " " + lastName + " " + setDate;
             log.info(answerLog);
             buildMessage(chatId, answer);
@@ -854,8 +941,10 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
-    private void showAllTermins(long chatId) {
+    private void showAllTermins(long chatId, String language) {
         List<Termin> userTermins = terminRepository.findByUserId(chatId);
+        Optional<User> user = Optional.of(userRepository.findById(chatId).get());
+
         List<Termin> sortedList = userTermins.stream()
                 .sorted(Comparator.comparing(Termin::getTerminDate))
                 .sorted(Comparator.comparing(Termin::getTerminTime))
@@ -863,41 +952,46 @@ public class Bot extends TelegramLongPollingBot {
 
 
         String answer;
+
         if (!userTermins.isEmpty()) {
             for (Termin termin : sortedList) {
-                answer = answerTermin(termin);
+                answer = answerTermin(termin, language);
                 buildMessage(chatId, answer);
-                
+
             }
             log.info("User show your List of all Termins: " + userTermins.size());
         } else {
-            answer = "you have not Termins";
+            answer = user.get().getLanguage().toLowerCase().equals("englisch") ? "you have not Termins" : user.get().getLanguage().toLowerCase().equals("russian") ? "У вас нет Терминов" : "";
             log.info(answer);
             buildMessage(chatId, answer);
         }
     }
 
-    private void showAllBirthday(long chatId) {
+    private void showAllBirthday(long chatId, String language) {
         List<Birthday> userBirthdays = birthdayRepository.findByUserId(chatId);
         List<Birthday> sortedList = userBirthdays.stream()
                 .sorted(Comparator.comparing(Birthday::getBirthdayDate))
                 .toList();
 
-        String answer;
+        String answer1;
+        String answerLog;
         if (!userBirthdays.isEmpty()) {
             for (Birthday birthday : sortedList) {
-                answer = answerBirthday(birthday);
-                buildMessage(chatId, answer);
+                answer1 = answerBirthday(birthday, language);
+                buildMessage(chatId, answer1);
             }
             log.info("User show your List of all Birthdays: " + userBirthdays.size());
         } else {
-            answer = "you have not Birthdays";
-            log.info(answer);
-            buildMessage(chatId, answer);
+            answer1 = language.toLowerCase().equals("englisch") ? "you have not Birthdays" : language.toLowerCase().equals("russian") ? "У вас Нет дней рождений" : "";
+            answerLog = "you have not Birthdays";
+            log.info(answerLog);
+            buildMessage(chatId, answer1);
         }
     }
 
     private void showAllReminder(long chatId) {
+        Optional<User> user = Optional.of(userRepository.findById(chatId).get());
+
         List<Reminder> userReminder = reminderRepository.findByUserId(chatId);
         List<Reminder> sortedList = userReminder.stream()
                 .sorted(Comparator.comparing(Reminder::getReminderTime))
@@ -912,20 +1006,25 @@ public class Bot extends TelegramLongPollingBot {
             }
             log.info("User show your List of all Reminders: " + userReminder.size());
         } else {
-            answer = "you have not Reminders";
+            answer = user.get().getLanguage().toLowerCase().equals("englisch") ? "you have not Reminders"
+                    : user.get().getLanguage().toLowerCase().equals("russian") ?"У вас нет напоминаний":"";
             log.info(answer);
             buildMessage(chatId, answer);
         }
     }
 
     private void editRemindermindMinuts(Long chatId, String editremindermind, String messageText) {
+        Optional<User> user = Optional.of(userRepository.findById(chatId).get());
+
         Optional<Reminder> reminder = reminderRepository.findById(Long.parseLong(editremindermind));
         if (!messageText.isEmpty()) {
             reminder.get().setReminderMinusMin(messageText);
             reminderRepository.save(reminder.get());
 
-            String answer = "reminder edit Minutes: " + reminder.get().getReminderMinusMin() + "\n" +
-                    answerReminder(reminder.get());
+            String answer = user.get().getLanguage().toLowerCase().equals("englisch") ? "reminder edit Minutes: " + reminder.get().getReminderMinusMin() + "\n" +
+                    answerReminder(reminder.get()) : user.get().getLanguage().toLowerCase().equals("russian") ?
+                    "Изменить минуты через сколько будет приходить оповешение: " + reminder.get().getReminderMinusMin() + "\n" +
+                    answerReminder(reminder.get()):"";
 
             String answerLog = "reminder edit Minutes: " + reminder.get().getReminderMinusMin() + " ID : " + reminder.get().getId();
 
@@ -939,12 +1038,16 @@ public class Bot extends TelegramLongPollingBot {
 
     private void editRemindermindName(long chatId, String editremindermind, String reminderName) {
         Optional<Reminder> reminder = reminderRepository.findById(Long.parseLong(editremindermind));
+        Optional<User> user = Optional.of(userRepository.findById(chatId).get());
+
         if (!reminderName.isEmpty()) {
             reminder.get().setReminderTittle(wordFirstCharToLower(reminderName));
             reminderRepository.save(reminder.get());
 
-            String answer = "reminder edit name: " + reminder.get().getReminderTittle() + "\n" +
-                    answerReminder(reminder.get());
+            String answer = user.get().getLanguage().toLowerCase().equals("englisch") ?"reminder edit name: " + reminder.get().getReminderTittle() + "\n" +
+                    answerReminder(reminder.get()) :
+                    user.get().getLanguage().toLowerCase().equals("russian") ? "Изменить имя Оповещения: " + reminder.get().getReminderTittle() + "\n" +
+                            answerReminder(reminder.get()):"";
 
             String answerLog = "reminder edit Name: " + reminder.get().getReminderTittle() + " ID : " + reminder.get().getId();
 
@@ -953,10 +1056,13 @@ public class Bot extends TelegramLongPollingBot {
 
         }
         clearSelectedcommend();
+
     }
 
     private void editRemindermindTime(long chatId, String editremindermind, String timeReminder) {
         Optional<Reminder> reminder = reminderRepository.findById(Long.parseLong(editremindermind));
+        Optional<User> user = Optional.of(userRepository.findById(chatId).get());
+
         String answer = "";
         String answerLog = "";
 
@@ -973,15 +1079,18 @@ public class Bot extends TelegramLongPollingBot {
 
             if (trueFalseTime.get(0).equals("true") && trueFalseTime.get(1).equals("true")) {
 
-                answer = "Reminder edit Reminder time: " + reminder.get().getReminderTime() + "\n" +
-                        answerReminder(reminder.get());
+                answer = user.get().getLanguage().toLowerCase().equals("englisch") ? "Reminder edit Reminder time: " + reminder.get().getReminderTime() + "\n" +
+                        answerReminder(reminder.get()) :
+                        user.get().getLanguage().toLowerCase().equals("russian") ?"Пользователь изменил время оповешиния: " + reminder.get().getReminderTime() + "\n" +
+                        answerReminder(reminder.get()):"";
 
                 answerLog = "Reminder edit Reminder time: " + reminder.get().getReminderTime() + " ID: " + reminder.get().getId();
             }
 
             if (trueFalseTime.get(0).equals("false") || trueFalseTime.get(1).equals("false")) {
 
-                answer = "Reminder time: " + reminder.get().getReminderTime() + " | /redittime_" + reminder.get().getId();
+                answer = user.get().getLanguage().toLowerCase().equals("englisch") ? "Reminder time: " + reminder.get().getReminderTime() + " | /redittime_" + reminder.get().getId() :
+                        user.get().getLanguage().toLowerCase().equals("russian") ? "Время оповешиния: " + reminder.get().getReminderTime() + " | /redittime_" + reminder.get().getId():"";
                 answerLog = "User set false Time";
 
             }
@@ -995,6 +1104,8 @@ public class Bot extends TelegramLongPollingBot {
 
     private void editRemindermindDays(long chatId, String editremindermind, String messageText) {
         Optional<Reminder> reminder = reminderRepository.findById(Long.parseLong(editremindermind));
+        Optional<User> user = Optional.of(userRepository.findById(chatId).get());
+
         if (!messageText.isEmpty()) {
             String reminderDays;
             if (messageText.equalsIgnoreCase("all")) {
@@ -1012,8 +1123,10 @@ public class Bot extends TelegramLongPollingBot {
             reminder.get().setReminderDays(daysChecked);
             reminderRepository.save(reminder.get());
 
-            String answer = "reminder edit days: " + reminder.get().getReminderDays() + "\n" +
-                    answerReminder(reminder.get());
+            String answer = user.get().getLanguage().toLowerCase().equals("englisch") ? "reminder edit days: " + reminder.get().getReminderDays() + "\n" +
+                    answerReminder(reminder.get()) :
+                    user.get().getLanguage().toLowerCase().equals("russian") ? "Изменены дни оповешений: " + reminder.get().getReminderDays() + "\n" +
+                            answerReminder(reminder.get()):"";
             String answerLog = "reminder edit Days: " + reminder.get().getReminderDays() + " ID : " + reminder.get().getId();
 
             buildMessage(chatId, answer);
@@ -1023,18 +1136,17 @@ public class Bot extends TelegramLongPollingBot {
         clearSelectedcommend();
     }
 
-
     private String reminderCheckDays(Long chatId, String reminderDays) {
-        List <String> checkDaysAll = List.of(reminderDays.trim().split(" "));
-        List <Integer> daysTrue = new ArrayList<>();
-        List <Integer> daysFalse = new ArrayList<>();
+        List<String> checkDaysAll = List.of(reminderDays.trim().split(" "));
+        List<Integer> daysTrue = new ArrayList<>();
+        List<Integer> daysFalse = new ArrayList<>();
         String res;
 
-        for (String day : checkDaysAll){
+        for (String day : checkDaysAll) {
             int dayInt = Integer.parseInt(day);
-            if (dayInt > 0 && dayInt < 8){
+            if (dayInt > 0 && dayInt < 8) {
                 daysTrue.add(dayInt);
-            }else {
+            } else {
                 daysFalse.add(dayInt);
 
             }
@@ -1047,7 +1159,7 @@ public class Bot extends TelegramLongPollingBot {
             log.error(chatId + falseAnswer);
             daysFalse.clear();
         }
-        if (daysTrue.isEmpty()){
+        if (daysTrue.isEmpty()) {
             daysTrue.addAll(List.of(1, 2, 3, 4, 5, 6, 7));
         }
 
@@ -1069,7 +1181,6 @@ public class Bot extends TelegramLongPollingBot {
             String answerLog = "reminder is on : " + reminder.get().getReminderTittle() + " ID : " + reminder.get().getId();
 
 
-
             buildMessage(chatId, answer);
             log.info(answerLog);
         }
@@ -1089,7 +1200,6 @@ public class Bot extends TelegramLongPollingBot {
             String answerLog = "reminder is off: " + reminder.get().getReminderTittle() + " ID : " + reminder.get().getId();
 
 
-
             buildMessage(chatId, answer);
             log.info(answerLog);
 
@@ -1099,12 +1209,16 @@ public class Bot extends TelegramLongPollingBot {
 
     private void editBirthdayFirstname(long chatId, String birthdayId, String firstName) {
         Optional<Birthday> birthday = birthdayRepository.findById(Long.parseLong(birthdayId));
+        Optional<User> user = Optional.of(userRepository.findById(chatId).get());
+
         if (!firstName.isEmpty()) {
             birthday.get().setBirthdayFirstName(wordFirstCharToLower(firstName));
             birthdayRepository.save(birthday.get());
 
-            String answer = "birthday edit Firstname: " + birthday.get().getBirthdayFirstName() + "\n" +
-                    answerBirthday(birthday.get());
+            String answer = user.get().getLanguage().toLowerCase().equals("englisch") ? "birthday edit Firstname: " + birthday.get().getBirthdayFirstName() + "\n" +
+                        answerBirthday(birthday.get(), user.get().getLanguage()) :
+                    user.get().getLanguage().toLowerCase().equals("russian") ? "Изменино имя именинника: " + birthday.get().getBirthdayFirstName() + "\n" +
+                            answerBirthday(birthday.get(), user.get().getLanguage()):"";
 
             String answerLog = "birthday edit Firstname: " + birthday.get().getBirthdayFirstName() + " ID: " + birthday.get().getId();
 
@@ -1116,12 +1230,16 @@ public class Bot extends TelegramLongPollingBot {
 
     private void editBirthdayLastname(long chatId, String birthdayId, String lastName) {
         Optional<Birthday> birthday = birthdayRepository.findById(Long.parseLong(birthdayId));
+        Optional<User> user = Optional.of(userRepository.findById(chatId).get());
+
         if (!lastName.isEmpty()) {
             birthday.get().setBirthdayLastName(wordFirstCharToLower(lastName));
             birthdayRepository.save(birthday.get());
 
-            String answer = "birthday edit Lastname: " + birthday.get().getBirthdayLastName() + "\n" +
-                    answerBirthday(birthday.get());
+            String answer = user.get().getLanguage().toLowerCase().equals("englisch") ? "birthday edit Lastname: " + birthday.get().getBirthdayLastName() + "\n" +
+                    answerBirthday(birthday.get(), user.get().getLanguage()) :
+                    user.get().getLanguage().toLowerCase().equals("russian") ? "Изменино Фамилия именинника: " + birthday.get().getBirthdayLastName() + "\n" +
+                            answerBirthday(birthday.get(), user.get().getLanguage()):"";
 
             String answerLog = "birthday edit Lastname: " + birthday.get().getBirthdayLastName() + " ID: " + birthday.get().getId();
 
@@ -1134,6 +1252,8 @@ public class Bot extends TelegramLongPollingBot {
 
     private void editBirthdayDate(long chatId, String birthdayId, String birthdayDateCheck) {
         Optional<Birthday> birthday = birthdayRepository.findById(Long.parseLong(birthdayId));
+        Optional<User> user = Optional.of(userRepository.findById(chatId).get());
+
         if (!birthdayDateCheck.isEmpty()) {
 
             String checkDataAll = dateCheckFnk(chatId, birthdayDateCheck);
@@ -1152,8 +1272,10 @@ public class Bot extends TelegramLongPollingBot {
             String answerLog;
             if (trueFalse.get(0).equals("true") && trueFalse.get(1).equals("true")) {
 
-                answer = "Birthday edit Birthday date: " + birthday.get().getBirthdayDate() + "\n" +
-                        answerBirthday(birthday.get());
+                answer = user.get().getLanguage().toLowerCase().equals("englisch") ? "Birthday edit Birthday date: " + birthday.get().getBirthdayDate() + "\n" +
+                        answerBirthday(birthday.get(), user.get().getLanguage()) :
+                        user.get().getLanguage().toLowerCase().equals("russian") ? "Изменена дата рождения имениника: " + birthday.get().getBirthdayDate() + "\n" +
+                        answerBirthday(birthday.get(), user.get().getLanguage()):"" ;
 
                 answerLog = "Birthday edit Birthday0 date: " + birthday.get().getBirthdayDate() + " ID: " + birthday.get().getId();
 
@@ -1172,14 +1294,19 @@ public class Bot extends TelegramLongPollingBot {
 
     private void editBirthdayForDays(long chatId, String birthdayId, String birthdayMinusDays) {
         Optional<Birthday> birthday = birthdayRepository.findById(Long.parseLong(birthdayId));
+        Optional<User> user = Optional.of(userRepository.findById(chatId).get());
+
         if (!birthdayMinusDays.isEmpty()) {
             birthday.get().setBirthdayMinusDay(birthdayMinusDays);
             birthdayRepository.save(birthday.get());
 
-            String answerStandart = "birthday edit for birthday days: " + birthday.get().getBirthdayMinusDay();
+            String answerStandart = user.get().getLanguage().toLowerCase().equals("englisch") ?
+                    "birthday edit for birthday days: " + birthday.get().getBirthdayMinusDay() :
+                    user.get().getLanguage().toLowerCase().equals("russian") ? "Изменили за сколько дней приходили напоминания до дня рождения: " + birthday.get().getBirthdayMinusDay() :"";
+
 
             String answer = answerStandart + "\n" +
-                    answerBirthday(birthday.get());
+                    answerBirthday(birthday.get(), user.get().getLanguage());
 
             String answerLog = answerStandart + " ID: " + birthday.get().getId();
 
@@ -1193,12 +1320,15 @@ public class Bot extends TelegramLongPollingBot {
 
     private void editTerminName(long chatId, String terminId, String terminName) {
         Optional<Termin> termin = terminRepository.findById(Long.parseLong(terminId));
+        Optional<User> user = Optional.of(userRepository.findById(chatId).get());
         if (!terminName.isEmpty()) {
             termin.get().setTerminName(terminName);
             terminRepository.save(termin.get());
 
-            String answer = "Termin edit Termin name: " + termin.get().getTerminName() + "\n" +
-                    answerTermin(termin.get());
+            String answer = user.get().getLanguage().toLowerCase().equals("englisch") ? "Termin edit Termin name: " + termin.get().getTerminName() + "\n" +
+                    answerTermin(termin.get(), user.get().getLanguage()) :
+                    user.get().getLanguage().toLowerCase().equals("russian") ? "Вы изменили имя термина: " + termin.get().getTerminName() + "\n" +
+                            answerTermin(termin.get(), user.get().getLanguage()) : "";
 
             String answerLog = "Termin edit Termin name: " + termin.get().getTerminName() + " ID: " + termin.get().getId();
 
@@ -1212,6 +1342,7 @@ public class Bot extends TelegramLongPollingBot {
         String answer = "";
         String answerLog = "";
         Optional<Termin> termin = terminRepository.findById(Long.parseLong(terminId));
+        Optional<User> user = Optional.of(userRepository.findById(chatId).get());
         if (!terminDateCheck.isEmpty()) {
 
             String checkDataAll = dateCheckFnk(chatId, terminDateCheck);
@@ -1228,13 +1359,16 @@ public class Bot extends TelegramLongPollingBot {
 
             if (trueFalse.get(0).equals("true") && trueFalse.get(1).equals("true")) {
 
-                answer = "Termin edit Termin date: " + termin.get().getTerminDate() + "\n" +
-                        answerTermin(termin.get());
+                answer = user.get().getLanguage().toLowerCase().equals("englisch") ? "Termin edit Termin date: " + termin.get().getTerminDate() + "\n" +
+                        answerTermin(termin.get(), user.get().getLanguage()) :
+                        user.get().getLanguage().toLowerCase().equals("russian") ? "Вы изменили дату термина" + termin.get().getTerminDate() + "\n" +
+                                answerTermin(termin.get(), user.get().getLanguage()) : "";
 
                 answerLog = "Termin edit Termin date: " + termin.get().getTerminDate() + " ID: " + termin.get().getId();
 
             } else {
-                answer = "Termin date: " + termin.get().getTerminDate() + " | /teditdate_" + termin.get().getId();
+                answer = user.get().getLanguage().toLowerCase().equals("englisch") ? "Termin date: " + termin.get().getTerminDate() + " | /teditdate_" + termin.get().getId() :
+                        user.get().getLanguage().toLowerCase().equals("russian") ? "Дата Термина" + termin.get().getTerminDate() + " | /teditdate_" + termin.get().getId() : "";
                 answerLog = "User set false Date";
 
             }
@@ -1248,6 +1382,8 @@ public class Bot extends TelegramLongPollingBot {
         String answer = "";
         String answerLog = "";
         Optional<Termin> termin = terminRepository.findById(Long.parseLong(terminId));
+        Optional<User> user = Optional.of(userRepository.findById(chatId).get());
+
         if (!terminTime.isEmpty()) {
 
             String checktimeAll = timeCheckFnk(chatId, terminTime);
@@ -1261,15 +1397,18 @@ public class Bot extends TelegramLongPollingBot {
             if (trueFalseTime.get(0).equals("true") && trueFalseTime.get(1).equals("true")) {
 
 
-                answer = "Termin edit Termin time: " + termin.get().getTerminTime() + "\n" +
-                        answerTermin(termin.get());
+                answer = user.get().getLanguage().toLowerCase().equals("englisch") ? "Termin edit Termin time: " + termin.get().getTerminTime() + "\n" +
+                        answerTermin(termin.get(), user.get().getLanguage()) :
+                        user.get().getLanguage().toLowerCase().equals("russian") ? "Вы изменили Время термина " + termin.get().getTerminTime() + "\n" +
+                                answerTermin(termin.get(), user.get().getLanguage()) : "";
 
                 answerLog = "Termin edit Termin time: " + termin.get().getTerminTime() + " ID: " + termin.get().getId();
 
             }
 
             if (trueFalseTime.get(0).equals("false") || trueFalseTime.get(1).equals("false")) {
-                answer = "Termin time: " + termin.get().getTerminTime() + " | /tedittime_" + termin.get().getId();
+                answer = user.get().getLanguage().toLowerCase().equals("englisch") ? "Termin time: " + termin.get().getTerminTime() :
+                        user.get().getLanguage().toLowerCase().equals("russian") ? "Время Термина" + termin.get().getTerminTime() : "" + " | /tedittime_" + termin.get().getId();
                 answerLog = "User set false time";
 
             }
@@ -1281,12 +1420,17 @@ public class Bot extends TelegramLongPollingBot {
 
     private void editTerminMinusMin(long chatId, String terminId, String terminMinusMin) {
         Optional<Termin> termin = terminRepository.findById(Long.parseLong(terminId));
+        Optional<User> user = Optional.of(userRepository.findById(chatId).get());
+
         if (!terminMinusMin.isEmpty()) {
             termin.get().setTerminMinusMin(terminMinusMin);
             terminRepository.save(termin.get());
 
-            String answer = "Termin edit Termin Minutes: " + termin.get().getTerminTime() + "\n" +
-                    answerTermin(termin.get());
+            String an = answerTermin(termin.get(), user.get().getLanguage());
+            System.out.println(an);
+            String answer = user.get().getLanguage().toLowerCase().equals("englisch") ? "Termin edit Termin Minutes: " + termin.get().getTerminMinusMin() + "\n" + an :
+                    user.get().getLanguage().toLowerCase().equals("russian") ? "Вы изменили Минуты до Термина " + termin.get().getTerminMinusMin() + "\n" + an : "";
+
 
             String answerLog = "Termin edit Termin Minutes: " + termin.get().getTerminTime() + " ID: " + termin.get().getId();
 
@@ -1299,15 +1443,19 @@ public class Bot extends TelegramLongPollingBot {
 
     private void editTerminForDays(long chatId, String terminId, String terminMinusdays) {
         Optional<Termin> termin = terminRepository.findById(Long.parseLong(terminId));
+        Optional<User> user = Optional.of(userRepository.findById(chatId).get());
+
         if (!terminMinusdays.isEmpty()) {
             termin.get().setTerminMinusDay(terminMinusdays);
             terminRepository.save(termin.get());
 
-            String answerStandard = "Termin edit Termin Minutes: " + termin.get().getTerminMinusDay();
-            String answer = answerStandard + "\n" +
-                    answerTermin(termin.get());
 
-            String answerLog = answerStandard + " ID: " + termin.get().getId();
+            String answer = user.get().getLanguage().toLowerCase().equals("englisch") ? "Termin edit Termin days: " + termin.get().getTerminMinusDay() + "\n" +
+                    answerTermin(termin.get(), user.get().getLanguage()) :
+                    user.get().getLanguage().toLowerCase().equals("russian") ? "Вы изменили дни  до термина: " + termin.get().getTerminMinusDay() + "\n" +
+                            answerTermin(termin.get(), user.get().getLanguage()) : "";
+
+            String answerLog = "Termin edit Termin days: " + termin.get().getTerminMinusDay() + " ID: " + termin.get().getId();
 
             buildMessage(chatId, answer);
             log.info(answerLog);
@@ -1315,7 +1463,8 @@ public class Bot extends TelegramLongPollingBot {
         clearSelectedcommend();
     }
 
-    private static String answerTermin(Termin termin) {
+    private static String answerTermin(Termin termin, String language) {
+
         String answer;
         String createdDate = termin.getCreatedAt().toString();
         List<String> parser = List.of(createdDate.split(" "));
@@ -1326,7 +1475,7 @@ public class Bot extends TelegramLongPollingBot {
         String time = parser.get(1);
         List<String> timeList = List.of(time.split(":"));
 
-        answer =
+        answer = language.toLowerCase().equals("englisch") ?
                 "----------------------------" + " \n" +
                         "ID: " + termin.getId() + "\n" +
                         "----------------------------" + " \n" +
@@ -1339,12 +1488,28 @@ public class Bot extends TelegramLongPollingBot {
                         "created: " + dateList.get(2) + "." + dateList.get(1) + "." + dateList.get(0) + " " +
                         timeList.get(0) + ":" + timeList.get(1) + "\n" +
                         "----------------------------" + " \n" +
-                        "Delete this Termin /deletethistermin_" + termin.getId();
+                        "Delete this Termin /deletethistermin_" + termin.getId() :
+                language.toLowerCase().equals("russian") ?
+                        "----------------------------" + " \n" +
+                                "ID: " + termin.getId() + "\n" +
+                                "----------------------------" + " \n" +
+                                "Термин Имя: " + termin.getTerminName() + " | /teditname_" + termin.getId() + "\n" +
+                                "Термин дата: " + termin.getTerminDate() + " | /teditdate_" + termin.getId() + "\n" +
+                                "Термин Время: " + termin.getTerminTime() + " | /tedittime_" + termin.getId() + "\n" +
+                                "Термин Минуты за: " + termin.getTerminMinusMin() + " | /teditminusmin_" + termin.getId() + "\n" +
+                                "Термин дни за: " + termin.getTerminMinusDay() + " | /teditfordays_" + termin.getId() + "\n" +
+                                "----------------------------" + " \n" +
+                                "создан: " + dateList.get(2) + "." + dateList.get(1) + "." + dateList.get(0) + " " +
+                                timeList.get(0) + ":" + timeList.get(1) + "\n" +
+                                "----------------------------" + " \n" +
+                                "Удалить этот Термин /deletethistermin_" + termin.getId() : ""
+        ;
         return answer;
     }
 
-    private static String answerBirthday(Birthday birthday) {
+    private static String answerBirthday(Birthday birthday, String language) {
         String answer;
+
         String createdDate = birthday.getCreatedAt().toString();
 
         List<String> parser = List.of(createdDate.split(" "));
@@ -1353,7 +1518,7 @@ public class Bot extends TelegramLongPollingBot {
         List<String> dateList = List.of(date.split("-"));
 
 
-        answer =
+        answer = language.toLowerCase().equals("englisch") ?
                 "----------------------------" + " \n" +
                         "ID: " + birthday.getId() + "\n" +
                         "----------------------------" + " \n" +
@@ -1364,7 +1529,20 @@ public class Bot extends TelegramLongPollingBot {
                         "----------------------------" + " \n" +
                         "created: " + dateList.get(2) + "." + dateList.get(1) + "." + dateList.get(0) + "\n" +
                         "----------------------------" + " \n" +
-                        "Delete this Birthday /deletethisbirthday_" + birthday.getId();
+                        "Delete this Birthday /deletethisbirthday_" + birthday.getId() :
+                language.toLowerCase().equals("russian") ?
+                        "----------------------------" + " \n" +
+                                "ID: " + birthday.getId() + "\n" +
+                                "----------------------------" + " \n" +
+                                "Имя: " + birthday.getBirthdayFirstName() + " | /beditfirstname_" + birthday.getId() + "\n" +
+                                "Фамилия: " + birthday.getBirthdayLastName() + " | /beditlastname_" + birthday.getId() + "\n" +
+                                "День рождения: " + birthday.getBirthdayDate() + " | /beditdate_" + birthday.getId() + "\n" +
+                                "Напоминае за эти дни: " + birthday.getBirthdayMinusDay() + " | /beditfordays_" + birthday.getId() + "\n" +
+                                "----------------------------" + " \n" +
+                                "created: " + dateList.get(2) + "." + dateList.get(1) + "." + dateList.get(0) + "\n" +
+                                "----------------------------" + " \n" +
+                                "Удалить это день Рождения /deletethisbirthday_" + birthday.getId() : ""
+        ;
         return answer;
     }
 
@@ -1378,8 +1556,7 @@ public class Bot extends TelegramLongPollingBot {
         List<String> dateList = List.of(date.split("-"));
 
         String onOff = reminder.getReminderOnOff() == null || reminder.getReminderOnOff().equalsIgnoreCase("on") || reminder.getReminderOnOff().equalsIgnoreCase("null") ?
-                "Remibder is ON | /offrem_"+ reminder.getId() : "Remibder is OFF | /onrem_" + reminder.getId()
-        ;
+                "Remibder is ON | /offrem_" + reminder.getId() : "Remibder is OFF | /onrem_" + reminder.getId();
         String answer;
         answer =
                 "----------------------------" + " \n" +
@@ -1505,92 +1682,186 @@ public class Bot extends TelegramLongPollingBot {
     // TODO: 12.01.2024 mydata
     //UserFunk
     private void myDataUser(long chatId) {
-        String answer;
+        String answer = "";
+        Optional<User> user;
+        user = Optional.of(userRepository.findById(chatId).get());
+
         if (userRepository.findById(chatId).isPresent()) {
-            Optional<User> user;
-            user = Optional.of(userRepository.findById(chatId).get());
-            List<Termin> termins = terminRepository.findByUserId(chatId);
-            List<Birthday> birthdays = birthdayRepository.findByUserId(chatId);
-            List<Reminder> reminders = reminderRepository.findByUserId(chatId);
+            if (user.get().getLanguage().toLowerCase().equals("englisch")) {
+                answer = engMyDataTex(chatId);
+            } else if (user.get().getLanguage().toLowerCase().equals("russian")) {
+                answer = ruMyDataTex(chatId);
+            }
 
-
-            String id = String.valueOf(user.get().getId());
-            String userNameInfo = user.get().getUserName() == null ? "your username null, please set you /username" :
-                    user.get().getUserName().equalsIgnoreCase("null") ? "your username null, please set you /username" :
-                            "user: " + user.get().getUserName() + " | Edit /username";
-            String firstNameInfo = user.get().getFirstName() == null ? "your Firstname null, please set you /firstname" :
-                    user.get().getFirstName().equalsIgnoreCase("null") ? "your Firstname null, please set you /firstname" :
-                            "Firstname: " + user.get().getFirstName() + " | Edit /firstname";
-            String lastNameInfo = user.get().getLastName() == null ? "your lastname null, please set you /lastname" :
-                    user.get().getLastName().equalsIgnoreCase("null") ? "your lastname null, please set you /lastname" :
-                            "Lastname: " + user.get().getLastName() + " | Edit /lastname";
-
-
-            String terminInfo = !termins.isEmpty() ? "You have saved  Termins: " + termins.size() + " \n" + "show all Termins /showtermin \n" :
-                    "You have not Termins, ADD  /newtermin \n";
-            String birthdayInfo = !birthdays.isEmpty() ? "You have saved  Birthdays: " + birthdays.size() + " \n" + "show all Birthdays /showbirthday " + "\n" :
-                    "You have not Birthdays, ADD  /newbirthday \n";
-            String reminderInfo = !reminders.isEmpty() ? "You have saved  Reminders: " + reminders.size() + " \n" + "show all Reminders /showreminder " + "\n" :
-                    "You have not Reminders, ADD  /newreminder \n";
-
-            String birthdayRemindForDays = user.get().getBirthdayFordaysTime() != null ?
-                    "Birthday reminders for day will come at: " + user.get().getBirthdayFordaysTime() + " | Edit /beditforeverydaystime" :
-                    "Birthday reminders for day  will come at: 18:00 | /beditforeverydaystime";
-            String birthdayRemindNowDays = user.get().getBirthdayNowDayTime() != null ?
-                    "Birthday reminders for this day will come at: " + user.get().getBirthdayNowDayTime() + "| Edit /beditfornowdaytime" :
-                    "Birthday reminders for this day will come at: 18:00 | Edit /beditfornowdaytime";
-            String terminRemindForDays = user.get().getTerminFordaysTime() != null ?
-                    "Termin reminders will come at: " + user.get().getTerminFordaysTime() + " | Edit /teditforeverydaystime" :
-                    "Termin reminders will come at: 18:00 | Edit /teditforeverydaystime";
-
-            LocalTime localTime = localTimeNow(chatId);
-
-
-            answer = "this is your saved data\n" +
-                    "----------------------------" + " \n" +
-                    id + " \n" +
-                    userNameInfo + " \n" +
-                    firstNameInfo + " \n" +
-                    lastNameInfo + " \n" +
-
-                    "----------------------------" + " \n" +
-                    "You Time: " + dtf.format(localTime) + " \n" +
-
-                    "Region: " + user.get().getRegion() + "\n set you /setregion for your correctly Time" + "\n" +
-                    "----------------------------" + " \n" +
-                    "registered: " + user.get().getRegisteredAt() + "\n" +
-                    "----------------------------" + " \n" +
-                    terminInfo + birthdayInfo + reminderInfo +
-                    "-------------SETTING---------------" + " \n" +
-                    terminRemindForDays + " \n" +
-                    birthdayRemindForDays + " \n" +
-                    birthdayRemindNowDays + " \n" +
-                    "----------------------------" + " \n" +
-                    "\n" +
-                    "if you want to delete click /deleteuserdata";
-
-            log.info("Show UserData: " + user.get().getUserName()
-                    + ", " + user.get().getFirstName()
-                    + ", " + user.get().getLastName()
-                    + ", Region: " + user.get().getRegion()
-                    + ", Registered: " + user.get().getRegisteredAt()
-                    + ", User have saved Termins: " + termins.size() + "\n"
-                    + ", User have saved Birthdays: " + birthdays.size() + "\n"
-                    + ", User have saved Reminders: " + reminders.size() + "\n"
-            );
         } else {
-            answer = "you are not in our database yet,\n" +
-                    "if you want to register, then click /registrade ";
+            answer = user.get().getLanguage().toLowerCase().equals("englisch") ? "you are not in our database yet,\n" +
+                    "if you want to register, then click /registrade " : user.get().getLanguage().toLowerCase().equals("russian") ? "Вы не зарегестрированные\n" +
+                    "чтобы зарегестрироваться, нажмите /registrade" : "";
         }
         buildMessage(chatId, answer);
     }
 
+    private String engMyDataTex(long chatId) {
+        Optional<User> user;
+        user = Optional.of(userRepository.findById(chatId).get());
+        List<Termin> termins = terminRepository.findByUserId(chatId);
+        List<Birthday> birthdays = birthdayRepository.findByUserId(chatId);
+        List<Reminder> reminders = reminderRepository.findByUserId(chatId);
+        String answer;
+
+
+        String id = String.valueOf(user.get().getId());
+        String userNameInfo = user.get().getUserName() == null ? "your username null, please set you /username" :
+                user.get().getUserName().equalsIgnoreCase("null") ? "your username null, please set you /username" :
+                        "user: " + user.get().getUserName() + " | Edit /username";
+        String firstNameInfo = user.get().getFirstName() == null ? "your Firstname null, please set you /firstname" :
+                user.get().getFirstName().equalsIgnoreCase("null") ? "your Firstname null, please set you /firstname" :
+                        "Firstname: " + user.get().getFirstName() + " | Edit /firstname";
+        String lastNameInfo = user.get().getLastName() == null ? "your lastname null, please set you /lastname" :
+                user.get().getLastName().equalsIgnoreCase("null") ? "your lastname null, please set you /lastname" :
+                        "Lastname: " + user.get().getLastName() + " | Edit /lastname";
+
+
+        String terminInfo = !termins.isEmpty() ? "You have saved  Termins: " + termins.size() + " \n" + "show all Termins /showtermin \n" :
+                "You have not Termins, ADD  /newtermin \n";
+        String birthdayInfo = !birthdays.isEmpty() ? "You have saved  Birthdays: " + birthdays.size() + " \n" + "show all Birthdays /showbirthday " + "\n" :
+                "You have not Birthdays, ADD  /newbirthday \n";
+        String reminderInfo = !reminders.isEmpty() ? "You have saved  Reminders: " + reminders.size() + " \n" + "show all Reminders /showreminder " + "\n" :
+                "You have not Reminders, ADD  /newreminder \n";
+
+        String birthdayRemindForDays = user.get().getBirthdayFordaysTime() != null ?
+                "Birthday reminders for day will come at: " + user.get().getBirthdayFordaysTime() + " | Edit /beditforeverydaystime" :
+                "Birthday reminders for day  will come at: 18:00 | /beditforeverydaystime";
+        String birthdayRemindNowDays = user.get().getBirthdayNowDayTime() != null ?
+                "Birthday reminders for this day will come at: " + user.get().getBirthdayNowDayTime() + "| Edit /beditfornowdaytime" :
+                "Birthday reminders for this day will come at: 18:00 | Edit /beditfornowdaytime";
+        String terminRemindForDays = user.get().getTerminFordaysTime() != null ?
+                "Termin reminders will come at: " + user.get().getTerminFordaysTime() + " | Edit /teditforeverydaystime" :
+                "Termin reminders will come at: 18:00 | Edit /teditforeverydaystime";
+
+        LocalTime localTime = localTimeNow(chatId);
+
+
+        answer = "this is your saved data\n" +
+                "----------------------------" + " \n" +
+                id + " \n" +
+                userNameInfo + " \n" +
+                firstNameInfo + " \n" +
+                lastNameInfo + " \n" +
+
+                "----------------------------" + " \n" +
+                "You Time: " + dtf.format(localTime) + " \n" +
+
+                "Region: " + user.get().getRegion() + "\n set you /setregion for your correctly Time" + "\n" +
+                "Language: " + user.get().getLanguage() + "\n set you /setlanguage for your menu language" + "\n" +
+                "----------------------------" + " \n" +
+                "registered: " + user.get().getRegisteredAt() + "\n" +
+                "----------------------------" + " \n" +
+                terminInfo + birthdayInfo + reminderInfo +
+                "-------------SETTING---------------" + " \n" +
+                terminRemindForDays + " \n" +
+                birthdayRemindForDays + " \n" +
+                birthdayRemindNowDays + " \n" +
+                "----------------------------" + " \n" +
+                "\n" +
+                "if you want to delete click /deleteuserdata";
+
+        log.info("Show UserData: " + user.get().getUserName()
+                + ", " + user.get().getFirstName()
+                + ", " + user.get().getLastName()
+                + ", Region: " + user.get().getRegion()
+                + ", Registered: " + user.get().getRegisteredAt()
+                + ", User have saved Termins: " + termins.size() + "\n"
+                + ", User have saved Birthdays: " + birthdays.size() + "\n"
+                + ", User have saved Reminders: " + reminders.size() + "\n"
+        );
+        return answer;
+    }
+
+    private String ruMyDataTex(long chatId) {
+        Optional<User> user = Optional.of(userRepository.findById(chatId).get());
+        List<Termin> termins = terminRepository.findByUserId(chatId);
+        List<Birthday> birthdays = birthdayRepository.findByUserId(chatId);
+        List<Reminder> reminders = reminderRepository.findByUserId(chatId);
+        String answer;
+
+
+        String id = String.valueOf(user.get().getId());
+        String userNameInfo = user.get().getUserName() == null ? "Твой ник null, чтобы изменить /username" :
+                user.get().getUserName().equalsIgnoreCase("null") ? "Твой ник null, чтобы изменить /username" :
+                        "Ник: " + user.get().getUserName() + " | изменить /username";
+
+        String firstNameInfo = user.get().getFirstName() == null ? "Твоё имя null, чтобы изменить /firstname" :
+                user.get().getFirstName().equalsIgnoreCase("null") ? "Твоё имя null, чтобы изменить /firstname" :
+                        "Имя: " + user.get().getFirstName() + " | изменить /firstname";
+
+        String lastNameInfo = user.get().getLastName() == null ? "Твоя Фамилия null, чтобы изменить /lastname" :
+                user.get().getLastName().equalsIgnoreCase("null") ? "Твоя Фамилия null, чтобы изменить /lastname" :
+                        "Фамилия: " + user.get().getLastName() + " | изменить /lastname";
+
+
+        String terminInfo = !termins.isEmpty() ? "У тебя сохраненно " + termins.size() + " Терминов\n" + "показать все Термины /showtermin \n" :
+                "У тебя нет ни одного Термина, добавить /newtermin \n";
+        String birthdayInfo = !birthdays.isEmpty() ? "У тебя сохраненно " + birthdays.size() + " Дней Рождений\n" + "показать все Дни Рождении /showbirthday " + "\n" :
+                "У тебя нет ни одного Дня Рождения, добавить /newbirthday \n";
+        String reminderInfo = !reminders.isEmpty() ? "У тебя сохраненно " + reminders.size() + " Напоминаний\n" + "показать все Напоминая /showreminder " + "\n" :
+                "У тебя нет ни одного Напоминая, добавить  /newreminder \n";
+
+        String birthdayRemindForDays = user.get().getBirthdayFordaysTime() != null ?
+                "Время когда будет приходит Напоминание о дне рождение до его дня: " + user.get().getBirthdayFordaysTime() + " | изменить /beditforeverydaystime" :
+                "Время когда будет приходит Напоминание о дне рождение до его дня: 18:00 | изменить /beditforeverydaystime";
+        String birthdayRemindNowDays = user.get().getBirthdayNowDayTime() != null ?
+                "Время когда будет приходит Напоминание о дне рождение в этот день: " + user.get().getBirthdayNowDayTime() + "| изменить /beditfornowdaytime" :
+                "Время когда будет приходит Напоминание о дне рождение в этот день: 18:00 | изменить /beditfornowdaytime";
+        String terminRemindForDays = user.get().getTerminFordaysTime() != null ?
+                "Время когда будет приходит Напоминание о термине до его дня: " + user.get().getTerminFordaysTime() + " | изменить /teditforeverydaystime" :
+                "Время когда будет приходит Напоминание о термине до его дня: 18:00 | изменить /teditforeverydaystime";
+
+        LocalTime localTime = localTimeNow(chatId);
+
+
+        answer = "Это твои Данные\n" +
+                "----------------------------" + " \n" +
+                id + " \n" +
+                userNameInfo + " \n" +
+                firstNameInfo + " \n" +
+                lastNameInfo + " \n" +
+
+                "----------------------------" + " \n" +
+                "твоё время: " + dtf.format(localTime) + " \n" +
+
+                "Регион: " + user.get().getRegion() + "\n измини свой /setregion для правильного отсылки напоминаний" + "\n" +
+                "Язык: " + user.get().getLanguage() + "\n измини язык /setlanguage для отоброжения в меню" + "\n" +
+                "----------------------------" + " \n" +
+                "создал аккаунт: " + user.get().getRegisteredAt() + "\n" +
+                "----------------------------" + " \n" +
+                terminInfo + birthdayInfo + reminderInfo +
+                "-------------Настройки---------------" + " \n" +
+                terminRemindForDays + " \n" +
+                birthdayRemindForDays + " \n" +
+                birthdayRemindNowDays + " \n" +
+                "----------------------------" + " \n" +
+                "\n" +
+                "если хочешь удалить все данные /deleteuserdata";
+
+        log.info("Show UserData: " + user.get().getUserName()
+                + ", " + user.get().getFirstName()
+                + ", " + user.get().getLastName()
+                + ", Region: " + user.get().getRegion()
+                + ", Registered: " + user.get().getRegisteredAt()
+                + ", User have saved Termins: " + termins.size() + "\n"
+                + ", User have saved Birthdays: " + birthdays.size() + "\n"
+                + ", User have saved Reminders: " + reminders.size() + "\n"
+        );
+        return answer;
+    }
+
     private void deleteUserData(Long chatId, String messageText) {
 
+        Optional<User> user = Optional.of(userRepository.findById(chatId).get());
         if (containsDigitsRegex(messageText)) {
             long userEnterId = Long.parseLong(messageText);
 
-            Optional<User> user = Optional.of(userRepository.findById(chatId).get());
 
             Long userId = user.get().getId();
 
@@ -1604,12 +1875,15 @@ public class Bot extends TelegramLongPollingBot {
             if (userIdCheck == userEnterId) {
                 deleteUser(chatId);
             } else {
-                buildMessage(chatId, "you entered the wrong numbers");
+                buildMessage(chatId, user.get().getLanguage().toLowerCase().equals("englisch") ? "you entered the wrong numbers" : user.get().getLanguage().toLowerCase().equals("russian") ? "Вы ввели не правильный номмер" : "");
+
             }
         } else if (!containsDigitsRegex(messageText)) {
-            buildMessage(chatId, "\"you entered the wrong numbers\"");
+            buildMessage(chatId, user.get().getLanguage().toLowerCase().equals("englisch") ? "you entered the wrong numbers" : user.get().getLanguage().toLowerCase().equals("russian") ? "Вы ввели не правильный номмер" : "");
+
         } else {
-            buildMessage(chatId, "\"you entered the wrong numbers\"");
+            buildMessage(chatId, user.get().getLanguage().toLowerCase().equals("englisch") ? "you entered the wrong numbers" : user.get().getLanguage().toLowerCase().equals("russian") ? "Вы ввели не правильный номмер" : "");
+
         }
         selectedCommands.clear();
 
@@ -1629,7 +1903,8 @@ public class Bot extends TelegramLongPollingBot {
                     + ", " + user.get().getFirstName()
                     + ", " + user.get().getLastName()
                     + ", Registered: " + user.get().getRegisteredAt());
-            String answer = "your data has been deleted from the database " + user.get().getUserName();
+            String answer = user.get().getLanguage().toLowerCase().equals("englisch") ? "your data has been deleted from the database " + user.get().getUserName() :
+                    user.get().getLanguage().toLowerCase().equals("russian") ?"Вы удалили все ваши данные " + user.get().getUserName():"";
             userRepository.deleteById(chatId);
             buildMessage(chatId, answer);
         }
@@ -1645,6 +1920,7 @@ public class Bot extends TelegramLongPollingBot {
                     .firstName(wordFirstCharToLower(chat.getFirstName()))
                     .lastName(wordFirstCharToLower(chat.getLastName()))
                     .userName(chat.getUserName())
+                    .language("Englisch")
                     .region("null")
                     .terminFordaysTime("18:00")
                     .birthdayFordaysTime("18:00")
@@ -1653,7 +1929,9 @@ public class Bot extends TelegramLongPollingBot {
                     .build();
             userRepository.save(user);
             log.info("User save: " + user);
-            buildMessage(chatId, "User save: " + user.getUserName());
+            String answer = user.getLanguage().toLowerCase().equals("englisch") ? "User save: " + user.getUserName()
+                    : user.getLanguage().toLowerCase().equals("russian") ? "Пользовотель сохранён: " + user.getUserName():"";
+            buildMessage(chatId, answer);
         }
     }
 
@@ -1664,7 +1942,25 @@ public class Bot extends TelegramLongPollingBot {
             user.get().setUserName(userName);
             userRepository.save(user.get());
 
-            String answer = "User: " + user.get().getUserName() + " set Username: " + userName;
+            String answer = user.get().getLanguage().toLowerCase().equals("englisch") ? "User: " + user.get().getUserName() + " set Username: " + userName :
+                    user.get().getLanguage().toLowerCase().equals("russian") ?"Пользователь: " + user.get().getUserName() + " изменил ник  пользователя: " + userName :"";
+            buildMessage(chatId, answer);
+            log.info(answer);
+
+        }
+        myDataUser(chatId);
+        clearSelectedcommend();
+    }
+
+    private void setLanguage(long chatId, Message message) {
+        Optional<User> user = userRepository.findById(chatId);
+        String language = message.getText();
+        if (!language.isEmpty()) {
+            user.get().setLanguage(language);
+            userRepository.save(user.get());
+
+            String answer = user.get().getLanguage().toLowerCase().equals("englisch") ? "User: " + user.get().getUserName() + " set language: " + language
+                    : user.get().getLanguage().toLowerCase().equals("russian") ? "Пользователь: " + user.get().getUserName() + " изменил Язык: " + language:"";
             buildMessage(chatId, answer);
             log.info(answer);
 
@@ -1680,7 +1976,8 @@ public class Bot extends TelegramLongPollingBot {
             user.get().setFirstName(wordFirstCharToLower(firstName));
             userRepository.save(user.get());
 
-            String answer = "User: " + user.get().getUserName() + " set Firstname: " + firstName;
+            String answer = user.get().getLanguage().toLowerCase().equals("englisch") ? "User: " + user.get().getUserName() + " set Firstname: " + firstName
+                    : user.get().getLanguage().toLowerCase().equals("russian") ? "Пользовотель: " + user.get().getUserName() + " изменил Имя: " + firstName:"";
             buildMessage(chatId, answer);
             log.info(answer);
 
@@ -1696,7 +1993,8 @@ public class Bot extends TelegramLongPollingBot {
             user.get().setLastName(wordFirstCharToLower(lastName));
             userRepository.save(user.get());
 
-            String answer = "User: " + user.get().getUserName() + " set Lastname: " + lastName;
+            String answer = user.get().getLanguage().toLowerCase().equals("englisch") ? "User: " + user.get().getUserName() + " set Lastname: " + lastName
+                    : user.get().getLanguage().toLowerCase().equals("russian") ? "Пользовотель: " + user.get().getUserName() + " изменил Фамилию: " + lastName:"";;
             buildMessage(chatId, answer);
             log.info(answer);
 
@@ -1717,7 +2015,10 @@ public class Bot extends TelegramLongPollingBot {
             saveTime = checkTimes;
             user.get().setBirthdayFordaysTime(saveTime);
             userRepository.save(user.get());
-            answer = "User: " + user.get().getUserName() + " set time for every day reminder: " + saveTime;
+            answer = user.get().getLanguage().toLowerCase().equals("englisch") ? "User: " + user.get().getUserName() + " set time for every day reminder: " + saveTime
+                    : user.get().getLanguage().toLowerCase().equals("russian") ? "Пользователь: " + user.get().getUserName() + " изменил время когда будет приходить оповешение о дне рождения до его дня: " + saveTime:"";
+
+
             answerLog = "User: " + user.get().getUserName() + " set time for every day reminder: " + saveTime;
 
             buildMessage(chatId, answer);
@@ -1728,7 +2029,8 @@ public class Bot extends TelegramLongPollingBot {
             user.get().setBirthdayFordaysTime(saveTime);
             userRepository.save(user.get());
 
-            answer = "User set false time | Edit /beditforeverydaystime ";
+            answer = user.get().getLanguage().toLowerCase().equals("englisch") ? "User set false time | Edit /beditforeverydaystime "
+                    : user.get().getLanguage().toLowerCase().equals("russian") ?"Пользователь ввёл не коректное время | изьенить /beditforeverydaystime":"";
             answerLog = "User set false time";
 
             buildMessage(chatId, answer);
@@ -1736,7 +2038,6 @@ public class Bot extends TelegramLongPollingBot {
         }
         clearSelectedcommend();
     }
-
     private void setTimeForNowDayBirthday(long chatId, Message message) {
         Optional<User> user = userRepository.findById(chatId);
         String checkTimes = message.getText();
@@ -1749,7 +2050,8 @@ public class Bot extends TelegramLongPollingBot {
             saveTime = checkTimes;
             user.get().setBirthdayNowDayTime(saveTime);
             userRepository.save(user.get());
-            answer = "User: " + user.get().getUserName() + " set time for every day reminder: " + saveTime;
+            answer = user.get().getLanguage().toLowerCase().equals("englisch") ? "User: " + user.get().getUserName() + " set time for every day reminder: " + saveTime
+                    : user.get().getLanguage().toLowerCase().equals("russian") ? "Пользователь: " + user.get().getUserName() + " изменил время когда будет приходить оповешение о дне рождения в этот день: " + saveTime:"";
             answerLog = "User: " + user.get().getUserName() + " set time for every day reminder: " + saveTime;
 
             buildMessage(chatId, answer);
@@ -1760,7 +2062,8 @@ public class Bot extends TelegramLongPollingBot {
             user.get().setBirthdayNowDayTime(saveTime);
             userRepository.save(user.get());
 
-            answer = "User set false time | Edit /beditforeverydaystime ";
+            answer = user.get().getLanguage().toLowerCase().equals("englisch") ? "User set false time | Edit /beditfornowdaytime "
+                    : user.get().getLanguage().toLowerCase().equals("russian") ?"Пользователь ввёл не коректное время | изьенить /beditfornowdaytime":"";
             answerLog = "User set false time";
 
             buildMessage(chatId, answer);
@@ -1768,7 +2071,6 @@ public class Bot extends TelegramLongPollingBot {
         }
         clearSelectedcommend();
     }
-
     private void setTimeTerminForEveryDays(long chatId, Message message) {
         Optional<User> user = userRepository.findById(chatId);
         String checkTimes = message.getText();
@@ -1781,7 +2083,8 @@ public class Bot extends TelegramLongPollingBot {
             saveTime = checkTimes;
             user.get().setTerminFordaysTime(saveTime);
             userRepository.save(user.get());
-            answer = "User: " + user.get().getUserName() + " set time for every day reminder: " + saveTime;
+            answer = user.get().getLanguage().toLowerCase().equals("englisch") ? "User: " + user.get().getUserName() + " set time for every day reminder: " + saveTime
+                    : user.get().getLanguage().toLowerCase().equals("russian") ? "Пользователь: " + user.get().getUserName() + " изменил время когда будет приходить оповешение о Терминах до его дня: " + saveTime:"";
             answerLog = "User: " + user.get().getUserName() + " set time for every day reminder: " + saveTime;
 
             buildMessage(chatId, answer);
@@ -1792,7 +2095,8 @@ public class Bot extends TelegramLongPollingBot {
             user.get().setTerminFordaysTime(saveTime);
             userRepository.save(user.get());
 
-            answer = "User set false time | Edit /teditforeverydaystime";
+            answer = user.get().getLanguage().toLowerCase().equals("englisch") ? "User set false time | Edit /teditforeverydaystime"
+                    : user.get().getLanguage().toLowerCase().equals("russian") ?"Пользователь ввёл не коректное время | изьенить /teditforeverydaystime":"";
             answerLog = "User set false time";
 
             buildMessage(chatId, answer);
@@ -1802,7 +2106,6 @@ public class Bot extends TelegramLongPollingBot {
 
 
     }
-
     private boolean checkTimeSettingsFnk(long chatId, String checkTimes) {
         List<String> timesList = new ArrayList<>();
 
@@ -1834,8 +2137,6 @@ public class Bot extends TelegramLongPollingBot {
 
         return res;
     }
-
-
     private void setUserRegion(Message region, long chatId) {
         Optional<User> user = userRepository.findById(chatId);
         String regionCheck = region.getText();
@@ -1852,14 +2153,18 @@ public class Bot extends TelegramLongPollingBot {
                 user.get().setRegion(regionsFirstToLower);
                 userRepository.save(user.get());
 
-                String answer = "User: " + user.get().getUserName() + " set region: " + regionsFirstToLower;
+                String answer = user.get().getLanguage().toLowerCase().equals("englisch") ? "User: " + user.get().getUserName() + " set region: " + regionsFirstToLower
+                        : user.get().getLanguage().toLowerCase().equals("russian") ? "Поользователь: " + user.get().getUserName() + " изменил регион: " + regionsFirstToLower :"";
                 buildMessage(chatId, answer);
                 log.info(answer);
                 myDataUser(chatId);
-            }else {
-                String answer = "User: " + user.get().getUserName() + " set false region: " + regionsFirstToLower + "\n" +
-                        regionsMapToString(regionsMap) +"\n"+
-                        "/setregion";
+            } else {
+                String answer = user.get().getLanguage().toLowerCase().equals("englisch") ? "User: " + user.get().getUserName() + " set false region: " + regionsFirstToLower + "\n" +
+                        regionsMapToString(regionsMap) + "\n" +
+                        "/setregion"
+                        : user.get().getLanguage().toLowerCase().equals("russian") ? "Поользователь: " + user.get().getUserName() + " ввёл не правильный регион: " + regionsFirstToLower + "\n" +
+                                                regionsMapToString(regionsMap) + "\n" +
+                                                "/setregion":"";
 
                 buildMessage(chatId, answer);
                 log.info(answer);
@@ -1872,6 +2177,12 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     private String wordFirstCharToLower(String checkWord) {
+        if (checkWord == null || checkWord.isEmpty()) {
+
+            checkWord = "null";
+            return checkWord;
+        }
+
         boolean b = !checkWord.isEmpty() && Character.isUpperCase(checkWord.charAt(0));
         if (b) {
             return checkWord;
@@ -1881,17 +2192,17 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     private static String regionsMapToString(Map<String, Integer> regionsMap) {
-        List <String> regionList = new ArrayList<>();
+        List<String> regionList = new ArrayList<>();
         for (Map.Entry<String, Integer> regionEntry : regionsMap.entrySet()) {
             regionList.add(regionEntry.getKey());
         }
-        return String.join("\n", regionList );
+        return String.join("\n", regionList);
     }
 
     //StartFunk
     private void help(long chatId) {
         log.info("Replied to user: ");
-        buildMessage(chatId, HELP_TEXT_START);
+        buildMessage(chatId, HELP_TEXT_START_ENGL);
     }
 
     private void start(long chatId) {
@@ -1900,20 +2211,31 @@ public class Bot extends TelegramLongPollingBot {
 
         String userName = user.get().getUserName();
         String setRegion = user.get().getRegion().equalsIgnoreCase("null") ?
-                "Please set you Region for correctly time! /setregion" : "";
+                user.get().getLanguage().toLowerCase().equals("englisch") ? "Please set you Region for correctly time! /setregion" :
+                        user.get().getLanguage().toLowerCase().equals("russian") ? "Пожалуйста установите ваш регион для правильного работы приложения! /setregion" :"" : "";
 
-        String answer = user.get().getUserName().equalsIgnoreCase("null") ? "HI, your username is null, please set you /username" + setRegion :
-                "Hi. " + userName + " nice to meet you.\n" + setRegion;
+        String answer = user.get().getLanguage().toLowerCase().equals("englisch") ?
+                user.get().getUserName().equalsIgnoreCase("null") ? "HI, your username is null, please set you /username" + setRegion :
+                "Hi. " + userName + " nice to meet you.\n" + setRegion
+                : user.get().getLanguage().toLowerCase().equals("russian") ?
+                user.get().getUserName().equalsIgnoreCase("null") ? "Привет, твой ник пуст, пожалуйста отредактируй его нажав /username" + setRegion :
+                "Привет. " + userName + " приятно познакомиться.\n" + setRegion
+        :"";
 
         log.info("Replied to user: " + userName);
         buildMessage(chatId, answer);
     }
 
     private void defaultComand(long chatId, String userName, String messageText) {
-        String answer = "Sorry, command was not recognized";
+        Optional<User> user = Optional.of(userRepository.findById(chatId).get());
+
+        String answer = user.get().getLanguage().toLowerCase().equals("englisch") ? "Sorry, command was not recognized"
+                : user.get().getLanguage().toLowerCase().equals("russian") ?"Извините такой команды нет":"";
+
         log.info("Replied to user: " + userName + " user falls command " + messageText);
         buildMessage(chatId, answer);
     }
+
     @Scheduled(cron = "${she.reminder}")
     private void reminderSender() {
         List<Reminder> allReminders = reminderRepository.findAll();
@@ -1950,6 +2272,7 @@ public class Bot extends TelegramLongPollingBot {
             }
         }
     }
+
     @Scheduled(cron = "${she.termin}")
     private void terminSender() {
 
@@ -1976,6 +2299,7 @@ public class Bot extends TelegramLongPollingBot {
             }
         }
     }
+
     @Scheduled(cron = ("${she.terminD}"))
     private void terminSenderDays() {
         List<Termin> allTermins = terminRepository.findAll();
@@ -2018,26 +2342,25 @@ public class Bot extends TelegramLongPollingBot {
                     }
 
 
-                if (!terminMinusDay.equals("0")) {
-                    List<String> terminsMinus = sortedList(terminMinusDay);
+                    if (!terminMinusDay.equals("0")) {
+                        List<String> terminsMinus = sortedList(terminMinusDay);
 
-                    for (String dayString : terminsMinus) {
-                        expectedDay = terminDate.minusDays(Long.parseLong(dayString));
-                        forDay = dayString;
+                        for (String dayString : terminsMinus) {
+                            expectedDay = terminDate.minusDays(Long.parseLong(dayString));
+                            forDay = dayString;
 
-                        if (Period.between(localDate, expectedDay).getMonths() == 0
-                                && Period.between(localDate, expectedDay).getDays() == 0
-                        ) {
-                            Long chatId = termin.getUser().getId();
-                            String answer = "In " + forDay + " day Have you Termin\n" + termin.getTerminName() + "\nDate: " + termin.getTerminDate() + "\nTime: " + termin.getTerminTime();
-                            messageStack.add(MessageToSend.builder()
-                                    .chatId(chatId)
-                                    .messageTyp("Termin")
-                                    .messageToSend(answer)
-                                    .messageToLog("")
-                                    .time(forDaysTime)
-                                    .build());
-
+                            if (Period.between(localDate, expectedDay).getMonths() == 0
+                                    && Period.between(localDate, expectedDay).getDays() == 0
+                            ) {
+                                Long chatId = termin.getUser().getId();
+                                String answer = "In " + forDay + " day Have you Termin\n" + termin.getTerminName() + "\nDate: " + termin.getTerminDate() + "\nTime: " + termin.getTerminTime();
+                                messageStack.add(MessageToSend.builder()
+                                        .chatId(chatId)
+                                        .messageTyp("Termin")
+                                        .messageToSend(answer)
+                                        .messageToLog("")
+                                        .time(regionsTime(chatId, forDaysTime))
+                                        .build());
 
 
                             }
@@ -2047,6 +2370,7 @@ public class Bot extends TelegramLongPollingBot {
             }
         }
     }
+
     @Scheduled(cron = ("${she.birthday}"))
     private void buildBirthdayScheduler() {
         List<Birthday> allbirthdays = birthdayRepository.findAll();
@@ -2107,7 +2431,7 @@ public class Bot extends TelegramLongPollingBot {
                                             .messageTyp("Birthday")
                                             .messageToSend(answer)
                                             .messageToLog("")
-                                            .time(forDaysTime)
+                                            .time(regionsTime(chatId, forDaysTime))
                                             .build());
 
                                 }
@@ -2124,50 +2448,42 @@ public class Bot extends TelegramLongPollingBot {
             }
         }
     }
+
     @Scheduled(cron = ("${she.stack}"))
     @Async
     protected void messageStackSort() {
         if (!messageStack.isEmpty()) {
-            LocalTime befor = null;
-            LocalTime now = null;
-            LocalTime after = null;
-
-            for (MessageToSend message : messageStack) {
-
-                befor = localTimeNow(message.getChatId()).minusMinutes(5);
-                now = localTimeNow(message.getChatId());
-                after = localTimeNow(message.getChatId()).plusHours(1);
-
-            }
-            LocalTime finalBefor = befor;
-            LocalTime finalAfter = after;
+//TODO: доделать стэк
             List<MessageToSend> sortedTime = messageStack.stream()
-                        .sorted(Comparator.comparing(MessageToSend::getTime))
-                        .filter(a -> ChronoUnit.MINUTES.between(finalBefor, a.getTime()) >= 0)
-                        .filter(a -> ChronoUnit.MINUTES.between(finalAfter, a.getTime()) <= 0)
-                        .toList();
+                    .sorted(Comparator.comparing(MessageToSend::getTime))
+                    .filter(a -> ChronoUnit.MINUTES.between(LocalTime.now().minusMinutes(5), a.getTime()) >= 0)
+                    .filter(a -> ChronoUnit.MINUTES.between(LocalTime.now().plusHours(1), a.getTime()) <= 0)
+                    .toList();
 
-                for (MessageToSend messageSend : sortedTime) {
-                    System.out.println("ID: " + messageSend.getChatId()/*+" MSG "+message.getMessageToSend()*/ + " Typ " + messageSend.getMessageTyp() + " time " + messageSend.getTime());
+            for (MessageToSend messageSend : sortedTime) {
+                //System.out.println("ID: " + messageSend.getChatId()/*+" MSG "+message.getMessageToSend()*/ + " Typ " + messageSend.getMessageTyp() + " time " + messageSend.getTime());
 
 
-                    if (
-                            ChronoUnit.HOURS.between(now, messageSend.getTime()) == 0
-                                    && ChronoUnit.MINUTES.between(now, messageSend.getTime()) == 0
-                                    && ChronoUnit.SECONDS.between(now, messageSend.getTime()) == 0
-                    ) {
-                        buildMessage(messageSend.getChatId(), messageSend.getMessageToSend());
-                        log.info("Message send: " + messageSend.getMessageToLog());
+                log.info("ChatID: " + messageSend.getChatId() +
+                        " MSG " + messageSend.getMessageToSend() +
+                        " time " + messageSend.getTime());
 
-                    }
+                if (
+                        ChronoUnit.HOURS.between(LocalTime.now(), messageSend.getTime()) == 0
+                                && ChronoUnit.MINUTES.between(LocalTime.now(), messageSend.getTime()) == 0
+                                && ChronoUnit.SECONDS.between(LocalTime.now(), messageSend.getTime()) == 0
+                ) {
+                    buildMessage(messageSend.getChatId(), messageSend.getMessageToSend());
+                    log.info("Message send: " + messageSend.getMessageToLog());
+
+                }
             }
             messageStack.clear();
         }
     }
 
-
-
     private void sendReminder(Reminder reminder, List<String> minusMinSort, LocalTime reminderTime, List<Integer> reminderDays, int weekDayNow) {
+
         int count = 0;
         LocalTime reminderTimeMin;
         for (String minuts : minusMinSort) {
@@ -2178,21 +2494,24 @@ public class Bot extends TelegramLongPollingBot {
                             || reminder.getReminderOnOff().equalsIgnoreCase("on")
                             || reminder.getReminderOnOff().equalsIgnoreCase("null")) {
 
-                    if (reminderDays.contains(weekDayNow)) {
-                        Long chatId = reminder.getUser().getId();
+                if (reminderDays.contains(weekDayNow)) {
+                    Long chatId = reminder.getUser().getId();
+                    Optional<User> user = Optional.of(userRepository.findById(chatId).get());
 
-                        if ( !minusMinSort.get(0).equals("0") ){
-                            String answer = "In " + minuts + " minutes it will be | " + reminder.getReminderTittle() + " | at " + reminder.getReminderTime() + " o'clock.";
-                            messageStack.add(MessageToSend.builder()
-                                    .chatId(chatId)
-                                    .messageTyp("Reminder")
-                                    .messageToSend(answer)
-                                    .messageToLog("")
-                                    .time(reminderTimeMin)
-                                    .build());
-                        }
+
+                    if (!minusMinSort.get(0).equals("0")) {
+                        String answer = user.get().getLanguage().toLowerCase().equals("englisch") ? "In " + minuts + " minutes it will be | " + reminder.getReminderTittle() + " | at " + reminder.getReminderTime() + " o'clock." :
+                                user.get().getLanguage().toLowerCase().equals("russian") ? "Через " + minuts + " мин. будет | " + reminder.getReminderTittle() + " | в " + reminder.getReminderTime():"";
+                        messageStack.add(MessageToSend.builder()
+                                .chatId(chatId)
+                                .messageTyp("Reminder")
+                                .messageToSend(answer)
+                                .messageToLog("")
+                                .time(regionsTime(chatId, reminderTimeMin))
+                                .build());
                     }
-                    count++;
+                }
+                count++;
 
 
                 if (
@@ -2201,13 +2520,15 @@ public class Bot extends TelegramLongPollingBot {
                                 || minusMinSort.size() == count) {
                     if (reminderDays.contains(weekDayNow)) {
                         Long chatId = reminder.getUser().getId();
-                        String answer = "Now " + reminder.getReminderTittle() + " " + reminder.getReminderTime();
+                        Optional<User> user = Optional.of(userRepository.findById(chatId).get());
+                        String answer = user.get().getLanguage().toLowerCase().equals("englisch") ? "Now " + reminder.getReminderTittle() + " " + reminder.getReminderTime()
+                                : user.get().getLanguage().toLowerCase().equals("russian") ? "Сейчас " + reminder.getReminderTittle() + " " + reminder.getReminderTime():"";
                         messageStack.add(MessageToSend.builder()
                                 .chatId(chatId)
                                 .messageTyp("Reminder")
                                 .messageToSend(answer)
                                 .messageToLog(answer)
-                                .time(reminderTime)
+                                .time(regionsTime(chatId, reminderTime))
                                 .build());
 
                     }
@@ -2230,13 +2551,15 @@ public class Bot extends TelegramLongPollingBot {
 
             ) {
                 Long chatId = termin.getUser().getId();
-                String answer = termin.getTerminName() + "\nIn " + s + " minutes it will be" + "\nat " + termin.getTerminTime() + " o'clock\nDate: " + termin.getTerminDate();
+                Optional<User> user = Optional.of(userRepository.findById(chatId).get());
+                String answer = user.get().getLanguage().toLowerCase().equals("englisch") ? termin.getTerminName() + "\nIn " + s + " minutes it will be" + "\nat " + termin.getTerminTime() + " o'clock\nDate: " + termin.getTerminDate()
+                        : user.get().getLanguage().toLowerCase().equals("russian") ? termin.getTerminName() + "\nЧерез " + s + " мин. в \n " + termin.getTerminTime() + "\nДата: " + termin.getTerminDate() :"";
                 messageStack.add(MessageToSend.builder()
                         .chatId(chatId)
                         .messageTyp("Termin")
                         .messageToSend(answer)
                         .messageToLog("")
-                        .time(terminTimeMin)
+                        .time(regionsTime(chatId, terminTimeMin))
                         .build());
             }
             count++;
@@ -2247,20 +2570,19 @@ public class Bot extends TelegramLongPollingBot {
                     ChronoUnit.DAYS.between(localDate, terminDate) == 0
             ) {
                 Long chatId = termin.getUser().getId();
-                String answer = termin.getTerminName() + "\nNow \n" + "at " + termin.getTerminTime() + " o'clock\nDate: " + termin.getTerminDate();
+                Optional<User> user = Optional.of(userRepository.findById(chatId).get());
+                String answer = user.get().getLanguage().toLowerCase().equals("englisch") ? termin.getTerminName() + "\nNow \n" + "at " + termin.getTerminTime() + " o'clock\nDate: " + termin.getTerminDate() :
+                        user.get().getLanguage().toLowerCase().equals("russian") ? termin.getTerminName() + "\nСейчас \n" + "в " + termin.getTerminTime() + " времени\nДата: " + termin.getTerminDate() :"";
                 messageStack.add(MessageToSend.builder()
                         .chatId(chatId)
                         .messageTyp("Termin")
                         .messageToSend(answer)
                         .messageToLog("")
-                        .time(terminTime)
+                        .time(regionsTime(chatId, terminTime))
                         .build());
             }
         }
     }
-
-
-
 
     private void nowBirthdaySend(LocalDate expectedDay, Birthday birthday, LocalDate localDate) {
         Optional<User> user = userRepository.findById(birthday.getUser().getId());
@@ -2279,18 +2601,20 @@ public class Bot extends TelegramLongPollingBot {
                     && Period.between(localDate, expectedDay).getDays() == 0
             ) {
                 Long chatId = birthday.getUser().getId();
-                String answer = "today " + birthday.getBirthdayFirstName() + " " + birthday.getBirthdayLastName() + " birthday |  " + birthday.getBirthdayDate();
+                String answer = user.get().getLanguage().toLowerCase().equals("englisch") ? "today " + birthday.getBirthdayFirstName() + " " + birthday.getBirthdayLastName() + " birthday |  " + birthday.getBirthdayDate()
+                        : user.get().getLanguage().toLowerCase().equals("russian") ? "Cегодня у " + birthday.getBirthdayFirstName() + " " + birthday.getBirthdayLastName() + " денб рождения |  " + birthday.getBirthdayDate():"";
 
                 messageStack.add(MessageToSend.builder()
                         .chatId(chatId)
                         .messageTyp("Birthday")
                         .messageToSend(answer)
                         .messageToLog("")
-                        .time(nowDayTime)
+                        .time(regionsTime(chatId, nowDayTime))
                         .build());
             }
         }
     }
+
     private List<String> checkParseTime(Long chatId, String times) {
         List<String> splitTimes = new ArrayList<>();
 
@@ -2314,6 +2638,7 @@ public class Bot extends TelegramLongPollingBot {
         }
         return splitTimeRes;
     }
+
     private static List<String> sortedList(String sort) {
         List<String> minusMinEdit = new ArrayList<>();
         List<String> minusMinEditTrim = new ArrayList<>();
@@ -2369,7 +2694,10 @@ public class Bot extends TelegramLongPollingBot {
 
         return minusMinSort;
     }
+
     private String dateCheckFnk(Long chatId, String dateCheck) {
+        Optional<User> user = Optional.of(userRepository.findById(chatId).get());
+
         String dayCheck;
         String monthCheck;
         String yearCheck;
@@ -2427,7 +2755,8 @@ public class Bot extends TelegramLongPollingBot {
 
         } else {
             day = "00";
-            String answer = "You set False day ";
+            String answer = user.get().getLanguage().toLowerCase().equals("englisch") ? "You set False day " :
+                    user.get().getLanguage().toLowerCase().equals("russian") ?"Вы задали не правильный день":"";
             buildMessage(chatId, answer);
             log.info(answer);
             dayBoolean = "false";
@@ -2438,9 +2767,10 @@ public class Bot extends TelegramLongPollingBot {
             monthBoolean = "true";
         } else {
             month = "00";
-            String answer = "You set False Month ";
+            String answer = user.get().getLanguage().toLowerCase().equals("englisch") ? "You set False Month " :
+                    user.get().getLanguage().toLowerCase().equals("russian") ? "Ввели не правильный месяц":"";
             buildMessage(chatId, answer);
-            log.info(answer);
+            log.info("You set False Month ");
             monthBoolean = "false";
         }
 
@@ -2476,6 +2806,7 @@ public class Bot extends TelegramLongPollingBot {
 
         return day + spliter + month + spliter + year + "&" + dayBoolean + "/" + monthBoolean + "/" + spliterBoolean;
     }
+
     private String timeCheckFnk(Long chatId, String timeCheck) {
         String minutesBoolean;
         String hourBoolean;
@@ -2488,6 +2819,8 @@ public class Bot extends TelegramLongPollingBot {
         String spliter = null;
         String hourNull = null;
         String minutesNull = null;
+
+        Optional<User> user = Optional.of(userRepository.findById(chatId).get());
 
         int indexSpliter = 0;
         List<String> timeParser = new ArrayList<>();
@@ -2523,7 +2856,7 @@ public class Bot extends TelegramLongPollingBot {
         } else {
             hour = "..";
             hourBoolean = "false";
-            buildMessage(chatId, "hour is false");
+            buildMessage(chatId, user.get().getLanguage().toLowerCase().equals("englisch") ?"hour is false": user.get().getLanguage().toLowerCase().equals("russian") ? "Вы ввели не правильный час":"");
         }
         if (Integer.parseInt(minutesCheck) >= 0 && Integer.parseInt(minutesCheck) < 60) {
             minutesNull = minutesCheck;
@@ -2531,7 +2864,7 @@ public class Bot extends TelegramLongPollingBot {
         } else {
             minutes = "..";
             minutesBoolean = "false";
-            buildMessage(chatId, "minutes is false");
+            buildMessage(chatId, user.get().getLanguage().toLowerCase().equals("englisch") ? "minutes is false" : user.get().getLanguage().toLowerCase().equals("russian") ?"Вы ввели не правильные минуты":"");
         }
         if (Integer.parseInt(minutesCheck) == 60) {
             minutesNull = "00";
@@ -2548,6 +2881,7 @@ public class Bot extends TelegramLongPollingBot {
 
         return hour + spliter + minutes + "&" + hourBoolean + "/" + minutesBoolean + "/" + spliterBoolean;
     }
+
     private String checkNullFnk(String numb) {
         String res = null;
         if (numb != null) {
@@ -2564,6 +2898,17 @@ public class Bot extends TelegramLongPollingBot {
         return res;
     }
     //Date
+
+    private LocalTime regionsTime(Long chatId, LocalTime time) {
+        Map<String, Integer> regions = getRegionsMap();
+        Optional<User> user = userRepository.findById(chatId);
+        if (regions.containsKey(user.get().getRegion())) {
+            return time.minusHours(regions.get(user.get().getRegion()));
+        }
+        return time.minusHours(regions.get("Germany"));
+
+    }
+
     protected LocalTime localTimeNow(Long chatId) {
         Map<String, Integer> regions = getRegionsMap();
         Optional<User> user = userRepository.findById(chatId);
@@ -2589,17 +2934,18 @@ public class Bot extends TelegramLongPollingBot {
         LocalDate november = LocalDate.of(localDate.getYear(), 11, letsSundayNov);
         LocalDate march = LocalDate.of(localDate.getYear(), 3, letsSundayMarch);
 
-        int russianHours = 2;
+        int russianHours = 0;
 
-        if (Period.between(localDate, november).getYears() == 0
-                && Period.between(localDate, november).getMonths() == 0
-                && Period.between(localDate, november).getDays() == 0) {
+        if (Period.between(localDate, november).getYears() <= 0
+                && Period.between(localDate, november).getMonths() <= 0
+                && Period.between(localDate, november).getDays() <= 0) {
             russianHours = 2;
-        } else if (Period.between(localDate, march).getYears() == 0
-                && Period.between(localDate, march).getMonths() == 0
-                && Period.between(localDate, march).getDays() == 0) {
+        } else if (Period.between(localDate, march).getYears() <= 0
+                && Period.between(localDate, march).getMonths() <= 0
+                && Period.between(localDate, march).getDays() <= 0) {
             russianHours = 1;
         }
+
         return russianHours;
     }
 

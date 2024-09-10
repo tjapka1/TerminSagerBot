@@ -32,7 +32,8 @@ public class User {
     private String lastName;
     @Column(name = "userName")
     private String userName;
-    
+    @Column(name = "language")
+    private String language;
     @Column(name = "region")
     private String region;
     @Column(name = "birthday_fordays_time")
